@@ -5,7 +5,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/DazzleNodes/DazzleNodes?include_prereleases&label=version)](https://github.com/DazzleNodes/DazzleNodes/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A curated collection of productivity-focused custom nodes for ComfyUI. Each node is independently developed and maintained, but packaged together for convenient installation.
+A curated collection of image/latent creation and transformation custom nodes for ComfyUI. Each node is independently developed and maintained, but packaged together for convenient installation.
 
 ## Included Nodes
 
@@ -190,6 +190,6 @@ Like the project?
 
 DazzleNodes, Copyright (C) 2025 Dustin Darcy
 
-Collection-level code is licensed under the MIT license - see the [LICENSE] file for details. 
+Collection-level code is licensed under the MIT license - see the [LICENSE](LICENSE) file for details. 
 
 See individual node directories for specific licenses. 
