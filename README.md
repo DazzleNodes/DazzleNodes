@@ -1,12 +1,15 @@
 # DazzleNodes
 
-$badges
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![ComfyUI Registry](https://img.shields.io/badge/ComfyUI-Registry-green.svg)](https://registry.comfy.org/publishers/djdarcy/nodes/DazzleNodes)
+[![GitHub release](https://img.shields.io/github/v/release/DazzleNodes/DazzleNodes?include_prereleases&label=version)](https://github.com/DazzleNodes/DazzleNodes/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A curated collection of productivity-focused custom nodes for ComfyUI. Each node is independently developed and maintained, but packaged together for convenient installation.
 
 ## Included Nodes
 
-### 🎯 Smart Resolution Calculator
+### Smart Resolution Calculator
 Flexible resolution and latent generation with intelligent aspect ratio handling.
 
 **Features:**
@@ -16,20 +19,18 @@ Flexible resolution and latent generation with intelligent aspect ratio handling
 - Direct latent output for sampling
 - Custom widgets for enhanced UX
 
-**Category:** DazzleNodes
 **Status:** Published ([Standalone](https://github.com/djdarcy/ComfyUI-Smart-Resolution-Calc))
 
-### 🎨 Fit Mask to Image
-Automatically resizes masks to match image dimensions for inpainting workflows.
+### Fit Mask to Image
+Automatically resizes masks to match image dimensions for inpainting workflows (for when the ksampler output no longer matches the input mask)
 
 **Features:**
-- Replaces 10-node workflow with single node
+- Replaces [10-node workflow](https://gist.github.com/djdarcy/5796b7b2d705278aa4ad612248fd7c77) with single node
 - Automatic dimension matching
 - Preview output for verification
 - Latent masking support
 - Nearest-exact scaling for quality preservation
 
-**Category:** DazzleNodes
 **Status:** Development
 
 ## Installation
@@ -181,16 +182,14 @@ Contributions welcome! Each node has its own repository and contribution guideli
 
 For collection-level issues (installation, documentation, architecture), open an issue in this repository.
 
-## License
-
-See individual node directories for specific licenses. Collection-level code is licensed under the terms specified in the LICENSE file.
-
-## Acknowledgements
-
-Dustin - 6962246+djdarcy@users.noreply.github.com
-
----
-
-**Like this project?**
+Like the project?
 
 [!["Buy Me A Coffee"](https://camo.githubusercontent.com/0b448aabee402aaf7b3b256ae471e7dc66bcf174fad7d6bb52b27138b2364e47/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67)](https://www.buymeacoffee.com/djdarcy)
+
+## License
+
+DazzleNodes, Copyright (C) 2025 Dustin Darcy
+
+Collection-level code is licensed under the MIT license - see the [LICENSE] file for details. 
+
+See individual node directories for specific licenses. 
