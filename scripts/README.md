@@ -295,22 +295,57 @@ git submodule status
 - Restart ComfyUI after switching
 - Symlink should point directly to source
 
+#### Windows Store Python Issues
+
+**Symptom:** Running `dev_mode.py` directly fails with missing PyYAML, but `python dev_mode.py` works fine.
+
+**Cause:** Windows file association points to Microsoft Store Python stub instead of your real Python installation.
+
+**Solution 1: Fix File Association (Recommended)**
+
+Run the provided batch script as Administrator:
+```cmd
+scripts\fix_python_association.cmd
+```
+
+This will:
+- Set `.py` files to use `C:\Python312\python.exe`
+- Show current and new associations
+
+**Solution 2: Disable Windows Store Python Stubs**
+
+1. Open **Windows Settings**
+2. Go to **Apps > Apps & features > App execution aliases**
+3. Turn **OFF** both `python.exe` and `python3.exe` toggles
+4. This removes the WindowsApps stubs from PATH
+
+**Solution 3: Always Use `python` Command (Workaround)**
+
+Just prefix commands with `python`:
+```bash
+python scripts\dev_mode.py status
+```
+
 ### Node Mappings
 
-Current node mappings (hardcoded in dev_mode.py):
+Node mappings are **automatically discovered** from `.gitmodules`. No manual configuration needed!
 
-```python
-NODE_MAPPINGS = {
-    "smart-resolution-calc": r"C:\code\smart-resolution-calc-repo\local",
-    "fit-mask-to-image": r"C:\code\ComfyUI-ImageMask-Fix\local"
-}
+The script parses `.gitmodules` to find all nodes:
+```ini
+[submodule "nodes/smart-resolution-calc"]
+    path = nodes/smart-resolution-calc
+    url = /c/code/smart-resolution-calc-repo/local
+
+[submodule "nodes/fit-mask-to-image"]
+    path = nodes/fit-mask-to-image
+    url = /c/code/ComfyUI-ImageMask-Fix/local
 ```
 
 **To Add New Node:**
 
-1. Edit `dev_mode.py` and add to `NODE_MAPPINGS` dictionary
-2. Run `python dev_mode.py status` to verify
-3. Use `python dev_mode.py dev [new-node-name]` to set up
+1. Add as git submodule: `git submodule add <url> nodes/<node-name>`
+2. That's it! The script automatically discovers it
+3. Run `python dev_mode.py status` to verify
 
 ### Example Session
 
