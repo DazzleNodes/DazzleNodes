@@ -1,0 +1,22 @@
+# DazzleNodes Development Mode Configuration
+# This file controls default behavior for the dev_mode.py script
+
+# Default status display mode ("quick" or "complete")
+# Quick mode: Shows basic status (dev/publish mode, existence)
+# Complete mode: Includes git branch, commit, and uncommitted changes
+# Can be overridden with --quick or --complete flags
+status_default_mode: quick
+
+# Backup configuration
+# When enabled, creates timestamped backups in nodes_bak/ before destructive operations
+# Can be disabled with --no-backup flag
+backup_enabled: true
+
+# Verbose output
+# When enabled, shows detailed operation logs
+# Can be enabled with -v or --verbose flag
+verbose: false
+
+# Environment variables (these override config file values):
+# - DEV_MODE_STATUS_DEFAULT: Set to "quick" or "complete"
+# - DEV_MODE_VERBOSE: Set to "1", "true", or "yes" to enable

@@ -6,14 +6,8 @@
 """
 
 import sys
+import importlib.util
 from pathlib import Path
-
-# Add nodes directory to Python path for imports
-_current_dir = Path(__file__).parent
-_nodes_dir = _current_dir / "nodes"
-
-if str(_nodes_dir) not in sys.path:
-    sys.path.insert(0, str(_nodes_dir))
 
 # Initialize aggregator dictionaries
 NODE_CLASS_MAPPINGS = {}
@@ -23,17 +17,45 @@ _failed_nodes = []
 
 print("[DazzleNodes] Loading node collection...")
 
+# Current directory
+_current_dir = Path(__file__).parent
+_nodes_dir = _current_dir / "nodes"
+
+# Helper function to load a node module from directory with hyphens
+def load_node_module(node_dir_name, display_name):
+    """Load a node module from a directory (even with hyphens in name)"""
+    node_path = _nodes_dir / node_dir_name
+    init_file = node_path / "__init__.py"
+
+    if not init_file.exists():
+        raise FileNotFoundError(f"__init__.py not found in {node_path}")
+
+    # Load the module using importlib
+    spec = importlib.util.spec_from_file_location(
+        node_dir_name.replace("-", "_"),  # Module name (replace hyphens)
+        init_file
+    )
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    # Extract NODE_CLASS_MAPPINGS and NODE_DISPLAY_NAME_MAPPINGS
+    if hasattr(module, 'NODE_CLASS_MAPPINGS'):
+        NODE_CLASS_MAPPINGS.update(module.NODE_CLASS_MAPPINGS)
+    else:
+        raise AttributeError(f"Module {node_dir_name} has no NODE_CLASS_MAPPINGS")
+
+    if hasattr(module, 'NODE_DISPLAY_NAME_MAPPINGS'):
+        NODE_DISPLAY_NAME_MAPPINGS.update(module.NODE_DISPLAY_NAME_MAPPINGS)
+
+    return len(module.NODE_CLASS_MAPPINGS)
+
 # ============================================================================
 # Load Smart Resolution Calculator
 # ============================================================================
 try:
-    from smart_resolution_calc import (
-        NODE_CLASS_MAPPINGS as SRC_MAPPINGS,
-        NODE_DISPLAY_NAME_MAPPINGS as SRC_DISPLAY,
-    )
-    NODE_CLASS_MAPPINGS.update(SRC_MAPPINGS)
-    NODE_DISPLAY_NAME_MAPPINGS.update(SRC_DISPLAY)
-    _loaded_nodes.append("Smart Resolution Calculator")
+    num_nodes = load_node_module("smart-resolution-calc", "Smart Resolution Calculator")
+    _loaded_nodes.append(f"Smart Resolution Calculator ({num_nodes} nodes)")
 except Exception as e:
     _failed_nodes.append(("Smart Resolution Calculator", str(e)))
     print(f"[DazzleNodes] ⚠️  Could not load Smart Resolution Calculator: {e}")
@@ -42,13 +64,8 @@ except Exception as e:
 # Load Fit Mask to Image
 # ============================================================================
 try:
-    from fit_mask_to_image import (
-        NODE_CLASS_MAPPINGS as FMI_MAPPINGS,
-        NODE_DISPLAY_NAME_MAPPINGS as FMI_DISPLAY,
-    )
-    NODE_CLASS_MAPPINGS.update(FMI_MAPPINGS)
-    NODE_DISPLAY_NAME_MAPPINGS.update(FMI_DISPLAY)
-    _loaded_nodes.append("Fit Mask to Image")
+    num_nodes = load_node_module("fit-mask-to-image", "Fit Mask to Image")
+    _loaded_nodes.append(f"Fit Mask to Image ({num_nodes} nodes)")
 except Exception as e:
     _failed_nodes.append(("Fit Mask to Image", str(e)))
     print(f"[DazzleNodes] ⚠️  Could not load Fit Mask to Image: {e}")
