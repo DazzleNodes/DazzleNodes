@@ -26,17 +26,14 @@ web/
     └── *.js
 ```
 
-## Dev vs Prod Mode
+## File Sync Behavior
 
-The sync script automatically detects your environment:
+The sync script always **copies** files (ComfyUI's web server doesn't follow symlinks):
 
-- **Dev Mode** (symlinks): Files in `web/` are symlinks to sources
-  - Changes in source repos immediately visible
-  - Detected by checking if `nodes/*` are symlinks
-
-- **Prod Mode** (copies): Files in `web/` are copies of sources
-  - Stable, isolated from source changes
-  - Standard git submodule setup
+- Files in `web/` are copies of sources
+- Hash-based caching prevents unnecessary re-syncs
+- Auto-sync runs on ComfyUI startup
+- Manual sync with `python scripts/sync_web_files.py --force` after editing source files
 
 ## Caching
 
@@ -47,25 +44,22 @@ The sync script uses MD5 hashing of all source files to detect changes:
 
 ## Manual Sync
 
-You can manually trigger a sync:
+You can manually trigger a sync after editing source files:
 
 ```bash
 cd C:\code\DazzleNodes\local
 
-# Auto-detect mode, use cache
+# Use cache (only sync if files changed)
 python scripts/sync_web_files.py
 
 # Force sync (ignore cache)
 python scripts/sync_web_files.py --force
 
-# Force dev mode (symlinks)
-python scripts/sync_web_files.py --mode=dev
-
-# Force prod mode (copies)
-python scripts/sync_web_files.py --mode=prod
-
 # Verbose output
 python scripts/sync_web_files.py --verbose
+
+# Quiet mode (for scripts)
+python scripts/sync_web_files.py --quiet
 ```
 
 ## Troubleshooting
@@ -78,18 +72,12 @@ python scripts/sync_web_files.py --verbose
    - `nodes/smart-resolution-calc/web/` (should have .js files)
    - `web_src/core/` (if using shared libraries)
 
-### Changes Not Visible (Dev Mode)
+### Changes Not Visible After Editing Source Files
 
-1. Verify dev mode: `python scripts/dev_mode.py status`
-2. Check symlinks: `dir C:\code\DazzleNodes\local\web /AL`
-3. Restart ComfyUI completely
-
-### Changes Not Visible (Prod Mode)
-
-1. Commit changes in source repository
-2. Update submodule: `cd nodes/node-name && git pull`
-3. Force sync: `python scripts/sync_web_files.py --force`
-4. Restart ComfyUI
+1. Force sync: `python scripts/sync_web_files.py --force`
+2. Restart ComfyUI completely
+3. Check browser console for JavaScript errors
+4. Clear browser cache (Ctrl+Shift+R)
 
 ## Architecture Details
 

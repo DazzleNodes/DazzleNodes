@@ -169,7 +169,7 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
     Main sync function.
 
     Args:
-        mode: "dev" or "prod" (None = auto-detect)
+        mode: Deprecated, ignored (always copies files for ComfyUI compatibility)
         force: Skip cache check, always sync
         quiet: Suppress output
         verbose: Extra debug output
@@ -180,12 +180,9 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
     start_time = time.time()
     web_dir = Path("web")
 
-    # Detect mode if not specified
-    if mode is None:
-        mode = detect_dev_mode()
-
+    # Note: Always copy files (ComfyUI web server doesn't follow symlinks)
     if not quiet:
-        print(f"[DazzleNodes] Syncing web resources (mode: {mode})...")
+        print(f"[DazzleNodes] Syncing web resources...")
 
     # Check if sync needed (unless forced)
     source_hash = compute_source_hash(WEB_SOURCES)
@@ -195,7 +192,6 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
                 print("[DazzleNodes] Web resources up-to-date (cached)")
             return {
                 "cached": True,
-                "mode": mode,
                 "nodes": 0,
                 "files": 0,
                 "time": time.time() - start_time
@@ -213,7 +209,6 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
     # Track seen node names (prevent duplicates)
     seen_nodes = {}
     total_files = 0
-    symlink_count = 0
     copy_count = 0
 
     # Process each source
@@ -236,24 +231,15 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
             for js_file in source_path.glob("*.js"):
                 target_file = target_dir / js_file.name
 
-                # For dev mode, use absolute path to ensure symlink creation works
-                # (symlinks created in temp dir must reference existing files)
-                if mode == "dev":
-                    source_for_link = js_file.resolve()
-                else:
-                    source_for_link = js_file
-
+                # Always copy (ComfyUI web server doesn't follow symlinks)
                 result = create_link_or_copy(
-                    source_for_link,
+                    js_file,
                     target_file,
-                    use_symlink=(mode == "dev"),
+                    use_symlink=False,
                     verbose=verbose
                 )
 
-                if result == "symlink":
-                    symlink_count += 1
-                    total_files += 1
-                elif result == "copy":
+                if result == "copy":
                     copy_count += 1
                     total_files += 1
 
@@ -289,34 +275,24 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
 
             seen_nodes[node_name] = str(node_dir)
 
-            # Create target subdirectory
+            # Create target directory and copy files
+            # (Always copy - ComfyUI web server doesn't follow symlinks)
             target_dir = temp_dir / node_name
             target_dir.mkdir(exist_ok=True)
 
             node_files = 0
 
-            # Sync all .js files
             for js_file in web_source.glob("*.js"):
                 target_file = target_dir / js_file.name
 
-                # For dev mode, use absolute path to ensure symlink creation works
-                # (symlinks created in temp dir must reference existing files)
-                if mode == "dev":
-                    source_for_link = js_file.resolve()
-                else:
-                    source_for_link = js_file
-
                 result = create_link_or_copy(
-                    source_for_link,
+                    js_file,
                     target_file,
-                    use_symlink=(mode == "dev"),
+                    use_symlink=False,
                     verbose=verbose
                 )
 
-                if result == "symlink":
-                    symlink_count += 1
-                    node_files += 1
-                elif result == "copy":
+                if result == "copy":
                     copy_count += 1
                     node_files += 1
 
@@ -365,15 +341,12 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
     elapsed = time.time() - start_time
 
     if not quiet:
-        method = f"{symlink_count} symlinks, {copy_count} copies" if mode == "dev" else f"{copy_count} copies"
-        print(f"[DazzleNodes] Synced {len(seen_nodes)} nodes, {total_files} files ({method}) in {elapsed:.2f}s")
+        print(f"[DazzleNodes] Synced {len(seen_nodes)} nodes, {total_files} files ({copy_count} copies) in {elapsed:.2f}s")
 
     return {
         "cached": False,
-        "mode": mode,
         "nodes": len(seen_nodes),
         "files": total_files,
-        "symlinks": symlink_count,
         "copies": copy_count,
         "time": elapsed
     }
@@ -384,19 +357,18 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Sync DazzleNodes web resources",
+        description="Sync DazzleNodes web resources (always copies files)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python sync_web_files.py                  # Auto-detect mode, use cache
-  python sync_web_files.py --mode=dev       # Force dev mode (symlinks)
-  python sync_web_files.py --mode=prod      # Force prod mode (copies)
+  python sync_web_files.py                  # Use cache, sync only if changed
   python sync_web_files.py --force          # Skip cache, always sync
   python sync_web_files.py --quiet          # Suppress output
   python sync_web_files.py --verbose        # Extra debug info
+
+Note: Always copies files (ComfyUI web server doesn't follow symlinks)
         """
     )
-    parser.add_argument("--mode", choices=["dev", "prod"], help="Force mode (dev=symlinks, prod=copies)")
     parser.add_argument("--force", action="store_true", help="Skip cache check, always sync")
     parser.add_argument("--quiet", action="store_true", help="Suppress output")
     parser.add_argument("--verbose", action="store_true", help="Extra debug output")
@@ -405,7 +377,6 @@ Examples:
 
     try:
         stats = sync_web_files(
-            mode=args.mode,
             force=args.force,
             quiet=args.quiet,
             verbose=args.verbose
@@ -414,11 +385,9 @@ Examples:
         if args.verbose and not args.quiet:
             print(f"\nSync Stats:")
             print(f"  Cached: {stats['cached']}")
-            print(f"  Mode: {stats['mode']}")
             print(f"  Nodes: {stats['nodes']}")
             print(f"  Files: {stats['files']}")
             if not stats['cached']:
-                print(f"  Symlinks: {stats.get('symlinks', 0)}")
                 print(f"  Copies: {stats.get('copies', 0)}")
             print(f"  Time: {stats['time']:.3f}s")
 
