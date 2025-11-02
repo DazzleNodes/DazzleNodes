@@ -10,6 +10,9 @@ import importlib.util
 import subprocess
 from pathlib import Path
 
+# Import version information
+from .version import __version__, VERSION, BASE_VERSION, PIP_VERSION
+
 # ============================================================================
 # Auto-sync web resources
 # ============================================================================
@@ -117,4 +120,12 @@ if not _loaded_nodes:
 WEB_DIRECTORY = "./web"
 
 # Export for ComfyUI
-__all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS', 'WEB_DIRECTORY']
+__all__ = [
+    'NODE_CLASS_MAPPINGS',
+    'NODE_DISPLAY_NAME_MAPPINGS',
+    'WEB_DIRECTORY',
+    '__version__',
+    'VERSION',
+    'BASE_VERSION',
+    'PIP_VERSION'
+]

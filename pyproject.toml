@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-dazzlenodes"
 description = "DazzleNodes - Collection of productivity custom nodes for ComfyUI workflows with smart auto-sync and dynamic imports"
-version = "0.1.0"
+dynamic = ["version"]
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
@@ -30,10 +30,21 @@ PublisherId = "djdarcy"
 DisplayName = "DazzleNodes Collection"
 Icon = ""
 
-# Publishing: Update version in this file and push to main branch
-# GitHub Actions will automatically publish to ComfyUI Registry
+# Publishing: Version is automatically managed by git-repokit versioning system
+# - Version is read from version.py (updated by git hooks)
+# - Update MAJOR, MINOR, PATCH in version.py to change version
+# - GitHub Actions will automatically publish when version changes
 
 # Collection Notes:
 # - Aggregates multiple custom nodes via git submodules
 # - Auto-syncs web resources on ComfyUI startup
 # - Provides shared utilities via web_src/core/
+
+# Build system configuration
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+# Dynamic version from version.py
+[tool.setuptools.dynamic]
+version = {attr = "version.BASE_VERSION"}
