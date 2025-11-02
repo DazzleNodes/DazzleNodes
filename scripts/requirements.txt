@@ -1,0 +1,4 @@
+# Requirements for DazzleNodes dev_mode.py script
+# Install with: pip install -r requirements.txt
+
+pyyaml>=6.0

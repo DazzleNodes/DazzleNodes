@@ -139,8 +139,14 @@ credentials.json
 #######################
 
 # Add custom patterns below
+nodes_bak/
+
+# Auto-generated web resources (synced from submodules)
+/web/*/            # All generated node directories
+/web/.sync_*       # Sync metadata files
 
 # RepoKit Private Content Protection (DO NOT REMOVE)
+# Note: private/ is already ignored above at line 134
 CLAUDE.md
 **/private_*
 .env.private
