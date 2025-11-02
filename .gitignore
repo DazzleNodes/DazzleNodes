@@ -140,3 +140,7 @@ credentials.json
 
 # Add custom patterns below
 nodes_bak/
+
+# Auto-generated web resources (synced from submodules)
+/web/*/            # All generated node directories
+/web/.sync_*       # Sync metadata files

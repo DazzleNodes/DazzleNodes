@@ -7,7 +7,34 @@
 
 import sys
 import importlib.util
+import subprocess
 from pathlib import Path
+
+# ============================================================================
+# Auto-sync web resources
+# ============================================================================
+def _sync_web_resources():
+    """Sync web resources from submodules and core nodes to web/ directory."""
+    sync_script = Path(__file__).parent / "scripts" / "sync_web_files.py"
+    if not sync_script.exists():
+        print("[DazzleNodes] Warning: sync_web_files.py not found")
+        return
+
+    try:
+        result = subprocess.run(
+            [sys.executable, str(sync_script), "--quiet"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False
+        )
+        if result.returncode != 0:
+            print(f"[DazzleNodes] Web sync warning: {result.stderr}")
+    except Exception as e:
+        print(f"[DazzleNodes] Web sync failed: {e}")
+
+# Run auto-sync before loading nodes
+_sync_web_resources()
 
 # Initialize aggregator dictionaries
 NODE_CLASS_MAPPINGS = {}
