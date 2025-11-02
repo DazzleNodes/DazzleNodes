@@ -22,9 +22,21 @@ import sys
 from pathlib import Path
 from datetime import datetime
 import shutil
-import yaml
 import os
 import configparser
+
+# Try to import yaml with helpful error message
+try:
+    import yaml
+except ImportError:
+    print("Error: PyYAML is not installed.")
+    print(f"\nCurrent Python: {sys.executable}")
+    print(f"Python version: {sys.version.split()[0]}")
+    print("\nTo fix this, run:")
+    print(f"  {sys.executable} -m pip install -r requirements.txt")
+    print("\nOr use 'python' command explicitly:")
+    print("  python dev_mode.py status")
+    sys.exit(1)
 
 # ============================================================================
 # Configuration and Constants

@@ -27,6 +27,20 @@ Manages switching between two modes:
 - Proper distribution structure
 - Ready for git commits and publishing
 
+### Requirements
+
+Install required Python packages:
+
+```bash
+cd C:\code\DazzleNodes\local\scripts
+pip install -r requirements.txt
+```
+
+**Required packages:**
+- `pyyaml>=6.0` - YAML configuration file parsing
+
+**Important**: Always run the script with `python dev_mode.py`, not just `dev_mode.py` directly. This ensures the correct Python interpreter (with installed dependencies) is used.
+
 ### Commands
 
 #### Status Command
