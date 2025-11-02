@@ -139,8 +139,16 @@ credentials.json
 #######################
 
 # Add custom patterns below
+nodes_bak/
+
+# Auto-generated web resources (synced from submodules) - DO NOT COMMIT
+/web/*/            # All generated node directories (core, smart-resolution-calc, etc)
+/web/.sync_*       # Sync metadata files (hash cache)
+!/web/README.md    # Explicitly allow web directory documentation
+!/web/*.md         # Allow any markdown documentation in web/
 
 # RepoKit Private Content Protection (DO NOT REMOVE)
+# Note: private/ is already ignored above at line 134
 CLAUDE.md
 **/private_*
 .env.private
