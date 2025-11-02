@@ -1,6 +1,6 @@
 [submodule "nodes/smart-resolution-calc"]
 	path = nodes/smart-resolution-calc
-	url = C:/code/smart-resolution-calc-repo/local
+	url = https://github.com/djdarcy/ComfyUI-Smart-Resolution-Calc.git
 [submodule "nodes/fit-mask-to-image"]
 	path = nodes/fit-mask-to-image
 	url = C:/code/ComfyUI-ImageMask-Fix/local
