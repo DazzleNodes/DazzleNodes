@@ -24,16 +24,11 @@ from datetime import datetime
 import shutil
 import yaml
 import os
+import configparser
 
 # ============================================================================
 # Configuration and Constants
 # ============================================================================
-
-# Node mappings: directory name -> source repository path
-NODE_MAPPINGS = {
-    "smart-resolution-calc": r"C:\code\smart-resolution-calc-repo\local",
-    "fit-mask-to-image": r"C:\code\ComfyUI-ImageMask-Fix\local"
-}
 
 # Default configuration
 DEFAULT_CONFIG = {
@@ -76,6 +71,48 @@ def get_dazzlenodes_root():
     """Get the DazzleNodes root directory."""
     script_dir = Path(__file__).parent
     return script_dir.parent
+
+def parse_gitmodules():
+    """
+    Parse .gitmodules file to discover node mappings.
+
+    Returns:
+        dict: Mapping of node_name -> source_path
+              Example: {"smart-resolution-calc": "C:\\code\\smart-resolution-calc-repo\\local"}
+    """
+    root = get_dazzlenodes_root()
+    gitmodules_path = root / ".gitmodules"
+
+    if not gitmodules_path.exists():
+        print(f"Warning: .gitmodules not found at {gitmodules_path}")
+        return {}
+
+    # Parse git config format
+    config = configparser.ConfigParser()
+    config.read(gitmodules_path)
+
+    node_mappings = {}
+
+    for section in config.sections():
+        # Section format: [submodule "nodes/node-name"]
+        if section.startswith('submodule "nodes/'):
+            # Extract: nodes/smart-resolution-calc -> smart-resolution-calc
+            full_path = section.replace('submodule "', '').replace('"', '')
+            node_name = full_path.split('/')[-1]
+
+            # Get the URL (source repository path)
+            if 'url' in config[section]:
+                url = config[section]['url']
+                # Convert /c/code/... to C:\code\...
+                if url.startswith('/c/'):
+                    url = 'C:' + url[2:].replace('/', '\\')
+                elif url.startswith('/'):
+                    # Handle other drive letters if needed
+                    url = url.replace('/', '\\')
+
+                node_mappings[node_name] = url
+
+    return node_mappings
 
 def is_symlink(path):
     """
@@ -323,6 +360,13 @@ def cmd_status(args, config):
     root = get_dazzlenodes_root()
     nodes_dir = root / "nodes"
 
+    # Load node mappings from .gitmodules
+    node_mappings = parse_gitmodules()
+
+    if not node_mappings:
+        print("Error: No nodes found in .gitmodules")
+        return 1
+
     # Determine mode
     mode = "complete" if args.complete else ("quick" if args.quick else config["status_default_mode"])
 
@@ -332,7 +376,7 @@ def cmd_status(args, config):
     print(f"Root: {root}\n")
 
     # Check each node
-    for node_name, source_path in NODE_MAPPINGS.items():
+    for node_name, source_path in node_mappings.items():
         node_path = nodes_dir / node_name
         source_path = Path(source_path)
 
@@ -400,14 +444,21 @@ def cmd_dev(args, config):
     root = get_dazzlenodes_root()
     nodes_dir = root / "nodes"
 
+    # Load node mappings from .gitmodules
+    node_mappings = parse_gitmodules()
+
+    if not node_mappings:
+        print("Error: No nodes found in .gitmodules")
+        return 1
+
     # Determine which nodes to process
     if args.node == "all":
-        nodes_to_process = list(NODE_MAPPINGS.keys())
-    elif args.node in NODE_MAPPINGS:
+        nodes_to_process = list(node_mappings.keys())
+    elif args.node in node_mappings:
         nodes_to_process = [args.node]
     else:
         print(f"Error: Unknown node '{args.node}'")
-        print(f"Available nodes: {', '.join(NODE_MAPPINGS.keys())}")
+        print(f"Available nodes: {', '.join(node_mappings.keys())}")
         return 1
 
     print(f"\n{'='*70}")
@@ -420,7 +471,7 @@ def cmd_dev(args, config):
     success_count = 0
     for node_name in nodes_to_process:
         node_path = nodes_dir / node_name
-        source_path = Path(NODE_MAPPINGS[node_name])
+        source_path = Path(node_mappings[node_name])
 
         print(f"Processing: {node_name}")
 
@@ -482,14 +533,21 @@ def cmd_publish(args, config):
     root = get_dazzlenodes_root()
     nodes_dir = root / "nodes"
 
+    # Load node mappings from .gitmodules
+    node_mappings = parse_gitmodules()
+
+    if not node_mappings:
+        print("Error: No nodes found in .gitmodules")
+        return 1
+
     # Determine which nodes to process
     if args.node == "all":
-        nodes_to_process = list(NODE_MAPPINGS.keys())
-    elif args.node in NODE_MAPPINGS:
+        nodes_to_process = list(node_mappings.keys())
+    elif args.node in node_mappings:
         nodes_to_process = [args.node]
     else:
         print(f"Error: Unknown node '{args.node}'")
-        print(f"Available nodes: {', '.join(NODE_MAPPINGS.keys())}")
+        print(f"Available nodes: {', '.join(node_mappings.keys())}")
         return 1
 
     print(f"\n{'='*70}")
@@ -630,16 +688,20 @@ Examples:
         return cmd_status(args, config)
     elif args.command == "dev":
         if not args.node:
+            node_mappings = parse_gitmodules()
             print("Error: Node name required")
             print(f"Usage: python dev_mode.py dev [node|all]")
-            print(f"Available nodes: {', '.join(NODE_MAPPINGS.keys())}")
+            if node_mappings:
+                print(f"Available nodes: {', '.join(node_mappings.keys())}")
             return 1
         return cmd_dev(args, config)
     elif args.command == "publish":
         if not args.node:
+            node_mappings = parse_gitmodules()
             print("Error: Node name required")
             print(f"Usage: python dev_mode.py publish [node|all]")
-            print(f"Available nodes: {', '.join(NODE_MAPPINGS.keys())}")
+            if node_mappings:
+                print(f"Available nodes: {', '.join(node_mappings.keys())}")
             return 1
         return cmd_publish(args, config)
     else:

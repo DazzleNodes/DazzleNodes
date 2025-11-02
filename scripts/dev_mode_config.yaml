@@ -1,5 +1,8 @@
 # DazzleNodes Development Mode Configuration
 # This file controls default behavior for the dev_mode.py script
+#
+# NOTE: Node mappings are automatically discovered from .gitmodules
+# No need to configure individual nodes here!
 
 # Default status display mode ("quick" or "complete")
 # Quick mode: Shows basic status (dev/publish mode, existence)
