@@ -115,13 +115,19 @@ def test_pyproject_has_version_config():
 
     content = pyproject_path.read_text()
 
-    # Check for dynamic version
-    assert 'dynamic = ["version"]' in content or "dynamic = ['version']" in content, \
-        "pyproject.toml missing dynamic version configuration"
+    # Check for version configuration (either static or dynamic)
+    import re
 
-    # Check for setuptools configuration
-    assert "[tool.setuptools.dynamic]" in content, \
-        "pyproject.toml missing setuptools dynamic configuration"
+    # Check for static version (required by comfy-cli for ComfyUI Registry)
+    has_static_version = re.search(r'version\s*=\s*["\'][0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9]+)?["\']', content)
+
+    # Check for dynamic version (alternative approach)
+    has_dynamic_version = ('dynamic = ["version"]' in content or "dynamic = ['version']" in content) and \
+                          "[tool.setuptools.dynamic]" in content
+
+    assert has_static_version or has_dynamic_version, \
+        "pyproject.toml must have either static version field (version = \"0.1.2-alpha\") " \
+        "or dynamic version configuration (dynamic = [\"version\"] + [tool.setuptools.dynamic])"
 
     # Check for ComfyUI registry config
     assert "[tool.comfy]" in content, \
