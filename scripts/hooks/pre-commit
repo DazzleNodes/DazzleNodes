@@ -9,6 +9,9 @@ current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 # Get the repository root
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 
+# Change to repository root for script execution
+cd "$REPO_ROOT" 2>/dev/null || true
+
 # PART 1: Update version.py (Two-Phase Process)
 # -----------------------------------------------
 # Pre-commit: Updates version with current commit hash, auto-stages if changed

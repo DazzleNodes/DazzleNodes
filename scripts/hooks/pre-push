@@ -23,12 +23,20 @@ echo ""
 # PYTHON SYNTAX CHECK
 # =============================================================================
 echo -e "${BLUE}Checking Python syntax...${NC}"
-python -m py_compile py/*.py *.py 2>/dev/null || {
-    echo -e "${RED}❌ Python syntax errors found${NC}"
-    echo "Fix syntax errors before pushing"
-    exit 1
-}
-echo -e "${GREEN}✓${NC} Python syntax check passed"
+
+# Find Python files to check (excluding submodules in nodes/)
+PYTHON_FILES=$(find . -name "*.py" -type f ! -path "./nodes/*" ! -path "./.git/*" ! -path "./venv/*" ! -path "./__pycache__/*" 2>/dev/null)
+
+if [ -n "$PYTHON_FILES" ]; then
+    echo "$PYTHON_FILES" | xargs python -m py_compile 2>&1 | grep -v "^$" && {
+        echo -e "${RED}❌ Python syntax errors found${NC}"
+        echo "Fix syntax errors before pushing"
+        exit 1
+    }
+    echo -e "${GREEN}✓${NC} Python syntax check passed"
+else
+    echo -e "${YELLOW}ℹ${NC} No Python files to check"
+fi
 
 # =============================================================================
 # RUN TESTS
