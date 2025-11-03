@@ -1,13 +1,9 @@
 name: Publish to ComfyUI Registry
 
-# Automatically publish to registry when pyproject.toml version changes
+# Manual publishing only - run via GitHub Actions UI
+# This prevents accidental publishing of every version update
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'pyproject.toml'
 
 jobs:
   publish:
@@ -36,12 +32,15 @@ jobs:
 #    - Name: REGISTRY_ACCESS_TOKEN
 #    - Value: Your token from the registry
 # 4. Update PublisherId in pyproject.toml with your publisher ID
-# 5. Push changes to main branch - this workflow will auto-publish
 
 # To publish a new version:
-# 1. Update the version field in pyproject.toml
+# 1. Update MAJOR, MINOR, PATCH in version.py (git hooks will update __version__)
 # 2. Commit and push to main branch
-# 3. Workflow will automatically publish to registry
+# 3. Create a git tag: git tag v0.1.0-alpha && git push origin v0.1.0-alpha
+# 4. Go to: https://github.com/DazzleNodes/DazzleNodes/actions/workflows/publish-to-registry.yml
+# 5. Click "Run workflow" → Select branch → Run workflow
+# 6. This manual step prevents accidental publishing of every commit
 
 # Note: DazzleNodes is a collection with git submodules
 # The checkout action uses 'submodules: recursive' to include all nodes
+# WARNING: fit-mask-to-image currently uses local path - will fail until published to GitHub

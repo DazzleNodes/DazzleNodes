@@ -20,8 +20,12 @@ if [ -f "$UPDATE_SCRIPT" ]; then
     
     if [ $UPDATE_EXIT -eq 0 ]; then
         # Success - either updated or already current
-        # Check if version.py was actually modified
-        if git diff --cached --name-only | grep -q "version.py"; then
+        # Check if version.py was modified (unstaged)
+        if git diff --name-only | grep -q "version.py"; then
+            # Auto-stage the updated version.py
+            git add version.py
+            echo "✓ Version updated and staged for commit"
+        elif git diff --cached --name-only | grep -q "version.py"; then
             echo "✓ Version updated for commit"
         else
             # No changes to version.py - it was already up to date
