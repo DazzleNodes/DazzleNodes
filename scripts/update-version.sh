@@ -188,3 +188,6 @@ if [ "$NEW_VERSION" != "$CURRENT_VERSION" ]; then
 else
     [ "$AUTO_MODE" = false ] && echo -e "${GREEN}[Version]${NC} Already up to date: $CURRENT_VERSION"
 fi
+
+# Always exit 0 on success (even when version unchanged)
+exit 0

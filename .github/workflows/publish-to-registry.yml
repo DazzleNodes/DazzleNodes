@@ -16,12 +16,25 @@ jobs:
         with:
           submodules: recursive  # Important: DazzleNodes uses git submodules
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Extract Version from version.py
+        id: get_version
+        run: |
+          VERSION=$(python -c "import sys; sys.path.insert(0, '.'); from version import BASE_VERSION; print(BASE_VERSION)")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+
       - name: Publish Custom Node
         uses: Comfy-Org/publish-node-action@main
         with:
           ## Add your own personal access token to your Github Repository secrets
           ## and reference it below. Please see the readme for more information.
           personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
+          version: ${{ steps.get_version.outputs.version }}
 
 # Setup Instructions:
 # 1. Create publisher account at https://registry.comfy.org/
