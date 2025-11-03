@@ -9,8 +9,10 @@ current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 # Get the repository root
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 
-# PART 1: Update version.py
-# -------------------------
+# PART 1: Update version.py (Two-Phase Process)
+# -----------------------------------------------
+# Pre-commit: Updates version with current commit hash, auto-stages if changed
+# Post-commit: Updates version with new commit hash (leaves unstaged for next commit)
 UPDATE_SCRIPT="$REPO_ROOT/scripts/update-version.sh"
 if [ -f "$UPDATE_SCRIPT" ]; then
     # Run in auto mode to update version before commit
