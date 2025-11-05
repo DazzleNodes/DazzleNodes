@@ -22,7 +22,7 @@ Flexible resolution and latent generation with intelligent aspect ratio handling
 **Status:** Published standalone in [ComfyUI Registry](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-smart-resolution-calc) and in [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in ComfyUI Registry
 
 ### Fit Mask to Image (standalone: **[Github](https://github.com/DazzleNodes/fit-mask-to-image)**)
-Automatically resizes masks to match image dimensions for inpainting workflows (for when the ksampler output no longer matches the input mask)
+Automatically resizes masks to match image dimensions for inpainting workflows (for when the ksampler output dimensions no longer matches the input mask dimensions)
 
 **Features:**
 - Replaces [10-node workflow](https://gist.github.com/djdarcy/5796b7b2d705278aa4ad612248fd7c77) with single node
