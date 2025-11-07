@@ -34,7 +34,6 @@ jobs:
           ## Add your own personal access token to your Github Repository secrets
           ## and reference it below. Please see the readme for more information.
           personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
-          version: ${{ steps.get_version.outputs.version }}
 
 # Setup Instructions:
 # 1. Create publisher account at https://registry.comfy.org/
