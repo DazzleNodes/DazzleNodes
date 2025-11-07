@@ -1,7 +1,7 @@
 # DazzleNodes
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![ComfyUI Registry](https://img.shields.io/badge/ComfyUI-Registry-green.svg)](https://registry.comfy.org/publishers/djdarcy/nodes/DazzleNodes)
+[![ComfyUI Registry](https://img.shields.io/badge/ComfyUI-Registry-green.svg)](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes)
 [![GitHub release](https://img.shields.io/github/v/release/DazzleNodes/DazzleNodes?include_prereleases&label=version)](https://github.com/DazzleNodes/DazzleNodes/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -9,7 +9,7 @@ A curated collection of image/latent creation and transformation custom nodes fo
 
 ## Included Nodes
 
-### Smart Resolution Calculator
+### Smart Resolution Calculator (standalone: **[Github](https://github.com/djdarcy/ComfyUI-Smart-Resolution-Calc) & [Comfy Registry](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-smart-resolution-calc)**)
 Flexible resolution and latent generation with intelligent aspect ratio handling.
 
 **Features:**
@@ -19,10 +19,10 @@ Flexible resolution and latent generation with intelligent aspect ratio handling
 - Direct latent output for sampling
 - Custom widgets for enhanced UX
 
-**Status:** Published ([Standalone](https://github.com/djdarcy/ComfyUI-Smart-Resolution-Calc))
+**Status:** Published standalone in [ComfyUI Registry](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-smart-resolution-calc) and in [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in ComfyUI Registry
 
-### Fit Mask to Image
-Automatically resizes masks to match image dimensions for inpainting workflows (for when the ksampler output no longer matches the input mask)
+### Fit Mask to Image (standalone: **[Github](https://github.com/DazzleNodes/fit-mask-to-image)**)
+Automatically resizes masks to match image dimensions for inpainting workflows (for when the ksampler output dimensions no longer matches the input mask dimensions)
 
 **Features:**
 - Replaces [10-node workflow](https://gist.github.com/djdarcy/5796b7b2d705278aa4ad612248fd7c77) with single node
@@ -31,7 +31,7 @@ Automatically resizes masks to match image dimensions for inpainting workflows (
 - Latent masking support
 - Nearest-exact scaling for quality preservation
 
-**Status:** Development
+**Status:** Available from [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in the Comfy Registry; download from [Github](https://github.com/DazzleNodes/fit-mask-to-image) to `ComfyUI\custom_nodes` for standalone install
 
 ## Installation
 
