@@ -106,12 +106,17 @@ def needs_sync(web_dir, source_hash):
     hash_file = web_dir / ".sync_hash"
 
     if not hash_file.exists():
+        print(f"[DazzleNodes] DEBUG needs_sync: .sync_hash does not exist, returning True")
         return True  # First sync
 
     try:
         cached_hash = hash_file.read_text().strip()
+        print(f"[DazzleNodes] DEBUG needs_sync: cached_hash = {cached_hash}")
+        print(f"[DazzleNodes] DEBUG needs_sync: source_hash  = {source_hash}")
+        print(f"[DazzleNodes] DEBUG needs_sync: hashes match = {cached_hash == source_hash}")
         return cached_hash != source_hash
-    except:
+    except Exception as e:
+        print(f"[DazzleNodes] DEBUG needs_sync: Exception reading hash: {e}")
         return True  # Assume sync needed on error
 
 def save_sync_hash(web_dir, source_hash):
@@ -186,8 +191,18 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
 
     # Check if sync needed (unless forced)
     source_hash = compute_source_hash(WEB_SOURCES)
+    if verbose:
+        print(f"[DazzleNodes] DEBUG: Computed source hash: {source_hash}")
+        print(f"[DazzleNodes] DEBUG: web_dir: {web_dir.absolute()}")
+        print(f"[DazzleNodes] DEBUG: .sync_hash path: {(web_dir / '.sync_hash').absolute()}")
+        print(f"[DazzleNodes] DEBUG: .sync_hash exists: {(web_dir / '.sync_hash').exists()}")
+
     if not force:
-        if not needs_sync(web_dir, source_hash):
+        sync_needed = needs_sync(web_dir, source_hash)
+        if verbose:
+            print(f"[DazzleNodes] DEBUG: needs_sync() returned: {sync_needed}")
+
+        if not sync_needed:
             if not quiet:
                 print("[DazzleNodes] Web resources up-to-date (cached)")
             return {

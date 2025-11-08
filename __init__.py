@@ -29,13 +29,14 @@ def _sync_web_resources():
         return
 
     try:
-        print(f"[DazzleNodes] Executing: {sys.executable} {sync_script}")
+        print(f"[DazzleNodes] Executing: {sys.executable} {sync_script} --verbose")
         result = subprocess.run(
-            [sys.executable, str(sync_script)],  # Removed --quiet to see output
+            [sys.executable, str(sync_script), "--verbose"],  # Added --verbose for debugging
             capture_output=True,
             text=True,
             timeout=30,  # Increased from 10s
-            check=False
+            check=False,
+            cwd=Path(__file__).parent  # CRITICAL: Set working directory to DazzleNodes directory
         )
 
         # Always show stdout
