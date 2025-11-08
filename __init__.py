@@ -29,9 +29,9 @@ def _sync_web_resources():
         return
 
     try:
-        print(f"[DazzleNodes] Executing: {sys.executable} {sync_script} --verbose")
+        print(f"[DazzleNodes] Executing: {sys.executable} {sync_script}")
         result = subprocess.run(
-            [sys.executable, str(sync_script), "--verbose"],  # Added --verbose for debugging
+            [sys.executable, str(sync_script)],  # Removed --quiet to see output
             capture_output=True,
             text=True,
             timeout=30,  # Increased from 10s
