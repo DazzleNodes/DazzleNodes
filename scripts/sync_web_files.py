@@ -282,8 +282,14 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
 
             node_files = 0
 
-            for js_file in web_source.glob("*.js"):
-                target_file = target_dir / js_file.name
+            # Use rglob to recursively find all .js files in subdirectories
+            for js_file in web_source.rglob("**/*.js"):
+                # Preserve directory structure relative to web_source
+                rel_path = js_file.relative_to(web_source)
+                target_file = target_dir / rel_path
+
+                # Create parent directories if needed (e.g., managers/, utils/)
+                target_file.parent.mkdir(parents=True, exist_ok=True)
 
                 result = create_link_or_copy(
                     js_file,

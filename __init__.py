@@ -19,22 +19,47 @@ from .version import __version__, VERSION, BASE_VERSION, PIP_VERSION
 def _sync_web_resources():
     """Sync web resources from submodules and core nodes to web/ directory."""
     sync_script = Path(__file__).parent / "scripts" / "sync_web_files.py"
+
+    print("[DazzleNodes] Starting web resource sync...")
+    print(f"[DazzleNodes] Sync script path: {sync_script}")
+    print(f"[DazzleNodes] Sync script exists: {sync_script.exists()}")
+
     if not sync_script.exists():
-        print("[DazzleNodes] Warning: sync_web_files.py not found")
+        print(f"[DazzleNodes] ERROR: sync_web_files.py not found at {sync_script}")
         return
 
     try:
+        print(f"[DazzleNodes] Executing: {sys.executable} {sync_script}")
         result = subprocess.run(
-            [sys.executable, str(sync_script), "--quiet"],
+            [sys.executable, str(sync_script)],  # Removed --quiet to see output
             capture_output=True,
             text=True,
-            timeout=10,
+            timeout=30,  # Increased from 10s
             check=False
         )
-        if result.returncode != 0:
-            print(f"[DazzleNodes] Web sync warning: {result.stderr}")
+
+        # Always show stdout
+        if result.stdout:
+            print("[DazzleNodes] Sync output:")
+            for line in result.stdout.strip().split('\n'):
+                if line:
+                    print(f"[DazzleNodes]   {line}")
+
+        # Check result
+        if result.returncode == 0:
+            print("[DazzleNodes] [OK] Web resource sync completed successfully")
+        else:
+            print(f"[DazzleNodes] [FAIL] Web sync failed with exit code {result.returncode}")
+            if result.stderr:
+                print(f"[DazzleNodes] Error output:")
+                for line in result.stderr.strip().split('\n'):
+                    if line:
+                        print(f"[DazzleNodes]   {line}")
+
+    except subprocess.TimeoutExpired:
+        print("[DazzleNodes] ERROR: Web sync timed out after 30 seconds")
     except Exception as e:
-        print(f"[DazzleNodes] Web sync failed: {e}")
+        print(f"[DazzleNodes] ERROR: Web sync exception: {type(e).__name__}: {e}")
 
 # Run auto-sync before loading nodes
 _sync_web_resources()
@@ -88,7 +113,7 @@ try:
     _loaded_nodes.append(f"Smart Resolution Calculator ({num_nodes} nodes)")
 except Exception as e:
     _failed_nodes.append(("Smart Resolution Calculator", str(e)))
-    print(f"[DazzleNodes] ⚠️  Could not load Smart Resolution Calculator: {e}")
+    print(f"[DazzleNodes] [WARN] Could not load Smart Resolution Calculator: {e}")
 
 # ============================================================================
 # Load Fit Mask to Image
@@ -98,22 +123,22 @@ try:
     _loaded_nodes.append(f"Fit Mask to Image ({num_nodes} nodes)")
 except Exception as e:
     _failed_nodes.append(("Fit Mask to Image", str(e)))
-    print(f"[DazzleNodes] ⚠️  Could not load Fit Mask to Image: {e}")
+    print(f"[DazzleNodes] [WARN] Could not load Fit Mask to Image: {e}")
 
 # ============================================================================
 # Report Loading Status
 # ============================================================================
 if _loaded_nodes:
-    print(f"[DazzleNodes] ✓ Loaded {len(_loaded_nodes)} nodes: {', '.join(_loaded_nodes)}")
-    print(f"[DazzleNodes] ✓ {len(NODE_CLASS_MAPPINGS)} node(s) available")
+    print(f"[DazzleNodes] [OK] Loaded {len(_loaded_nodes)} nodes: {', '.join(_loaded_nodes)}")
+    print(f"[DazzleNodes] [OK] {len(NODE_CLASS_MAPPINGS)} node(s) available")
 
 if _failed_nodes:
-    print(f"[DazzleNodes] ⚠️  Failed to load {len(_failed_nodes)} nodes:")
+    print(f"[DazzleNodes] [WARN] Failed to load {len(_failed_nodes)} nodes:")
     for node_name, error in _failed_nodes:
         print(f"[DazzleNodes]    - {node_name}: {error}")
 
 if not _loaded_nodes:
-    print("[DazzleNodes] ❌ No nodes loaded! Check submodule initialization.")
+    print("[DazzleNodes] [FAIL] No nodes loaded! Check submodule initialization.")
     print("[DazzleNodes]    Run: git submodule update --init --recursive")
 
 # Web directory for JavaScript widgets
