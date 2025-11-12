@@ -127,6 +127,16 @@ except Exception as e:
     print(f"[DazzleNodes] [WARN] Could not load Fit Mask to Image: {e}")
 
 # ============================================================================
+# Load Plasma Noise Generators
+# ============================================================================
+try:
+    num_nodes = load_node_module("dazzle-comfy-plasma-fast", "Plasma Noise Generators")
+    _loaded_nodes.append(f"Plasma Noise Generators ({num_nodes} nodes)")
+except Exception as e:
+    _failed_nodes.append(("Plasma Noise Generators", str(e)))
+    print(f"[DazzleNodes] [WARN] Could not load Plasma Noise Generators: {e}")
+
+# ============================================================================
 # Report Loading Status
 # ============================================================================
 if _loaded_nodes:

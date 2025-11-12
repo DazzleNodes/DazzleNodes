@@ -4,3 +4,6 @@
 [submodule "nodes/fit-mask-to-image"]
 	path = nodes/fit-mask-to-image
 	url = https://github.com/DazzleNodes/fit-mask-to-image.git
+[submodule "nodes/dazzle-comfy-plasma-fast"]
+	path = nodes/dazzle-comfy-plasma-fast
+	url = https://github.com/DazzleNodes/dazzle-comfy-plasma-fast.git

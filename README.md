@@ -33,6 +33,17 @@ Automatically resizes masks to match image dimensions for inpainting workflows (
 
 **Status:** Available from [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in the Comfy Registry; download from [Github](https://github.com/DazzleNodes/fit-mask-to-image) to `ComfyUI\custom_nodes` for standalone install
 
+### Plasma Noise Generators (fork: **[Github](https://github.com/DazzleNodes/dazzle-comfy-plasma-fast)**)
+GPU-accelerated noise generation with 100-200x speedup over CPU implementations. Fork of [comfy-plasma](https://github.com/Jordach/comfy-plasma) by Jordach with PyTorch optimization ([PR #7](https://github.com/Jordach/comfy-plasma/pull/7)).
+
+**Features:**
+- 5 noise types: Plasma, Random, Grey, Pink, Brown
+- GPU acceleration via PyTorch tensors
+- Automatic CPU fallback
+- Per-channel RGB clamping
+
+**Note:** This fork may be removed if the upstream project merges the optimization changes.
+
 ## Installation
 
 ### Method 1: ComfyUI Manager (Recommended - Coming Soon)
