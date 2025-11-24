@@ -5,6 +5,17 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.4-alpha] - 2025-11-24
+
+### Changed
+- **Plasma Noise Generators Updated** - Updated to v0.4.0
+  - Added OmniNoise unified generator combining all 5 noise types
+  - Dynamic widget visibility (turbulence for Plasma, distribution for Random)
+  - Two random distributions: Uniform (TV Static) and Gaussian (Centered Gray)
+  - Uniform distribution maintains 100% backwards compatibility with RandNoise node
+  - JavaScript-based widget management for intelligent UI
+  - See [dazzle-comfy-plasma-fast v0.4.0 release](https://github.com/DazzleNodes/dazzle-comfy-plasma-fast/releases/tag/v0.4.0) for full details
+
 ## [0.3.3-alpha] - 2025-11-15
 
 ### Changed

@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-dazzlenodes"
-version = "0.3.3-alpha"
+version = "0.3.4-alpha"
 description = "A curated collection of image/latent creation and transformation custom nodes for ComfyUI. Each node is independently developed and maintained, but packaged together for convenient installation."
 readme = "README.md"
 license = { file = "LICENSE" }

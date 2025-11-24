@@ -37,10 +37,13 @@ Automatically resizes masks to match image dimensions for inpainting workflows (
 GPU-accelerated noise generation with 100-200x speedup over CPU implementations. Fork of [comfy-plasma](https://github.com/Jordach/comfy-plasma) by Jordach with PyTorch optimization ([PR #7](https://github.com/Jordach/comfy-plasma/pull/7)).
 
 **Features:**
+- **OmniNoise unified generator** - All 5 noise types in one node with dynamic widgets
 - 5 noise types: Plasma, Random, Grey, Pink, Brown
+- Two random distributions: Uniform (TV Static) and Gaussian (Centered Gray)
 - GPU acceleration via PyTorch tensors
 - Automatic CPU fallback
 - Per-channel RGB clamping
+- Backwards compatible with original RandNoise node
 
 **Note:** This fork may be removed if the upstream project merges the optimization changes.
 
