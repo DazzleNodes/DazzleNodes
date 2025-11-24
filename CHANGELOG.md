@@ -5,6 +5,15 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.6-alpha] - 2025-11-24
+
+### Fixed
+- **Plasma Noise Generators** - Fixed OmniNoise execution failures (updated to v0.4.0 rebuild)
+  - Fixed optional parameter handling when widgets are hidden by JavaScript
+  - Fixed Plasma noise delegation (was calling wrong method name)
+  - Added fallback error handling for unknown noise types
+  - See [dazzle-comfy-plasma-fast v0.4.0 release](https://github.com/DazzleNodes/dazzle-comfy-plasma-fast/releases/tag/v0.4.0) for full details
+
 ## [0.3.5-alpha] - 2025-11-24
 
 ### Fixed
