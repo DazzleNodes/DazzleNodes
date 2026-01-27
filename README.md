@@ -54,9 +54,8 @@ Extended preview bridge functionality for ComfyUI workflows.
 
 ## Installation
 
-### Method 1: ComfyUI Manager (Recommended - Coming Soon)
+### Method 1: ComfyUI Manager (Recommended)
 
-Once published to ComfyUI Registry:
 ```
 Search for "DazzleNodes" in ComfyUI Manager and click Install
 ```

@@ -62,6 +62,68 @@ def _sync_web_resources():
     except Exception as e:
         print(f"[DazzleNodes] ERROR: Web sync exception: {type(e).__name__}: {e}")
 
+# ============================================================================
+# Auto-initialize empty submodules (e.g., after ComfyUI Manager install)
+# ============================================================================
+def _init_submodules_if_needed():
+    """Initialize git submodules if directories exist but are empty.
+
+    Skips symlinks/junctions (dev mode) and directories that already have content.
+    Only runs git submodule update for genuinely empty directories, which typically
+    means the repo was cloned without --recursive.
+    """
+    nodes_dir = Path(__file__).parent / "nodes"
+    if not nodes_dir.exists():
+        return
+
+    empty_submodules = []
+    for child in nodes_dir.iterdir():
+        if not child.is_dir():
+            continue
+        # Skip symlinks/junctions (dev mode)
+        try:
+            if child.is_symlink() or child.is_junction():
+                continue
+        except AttributeError:
+            # is_junction() added in Python 3.12
+            if child.is_symlink():
+                continue
+        # Check if directory is empty (or only contains .git file)
+        contents = list(child.iterdir())
+        if len(contents) == 0 or (len(contents) == 1 and contents[0].name == ".git"):
+            empty_submodules.append(child.name)
+
+    if not empty_submodules:
+        return
+
+    print(f"[DazzleNodes] Empty submodule directories detected: {', '.join(empty_submodules)}")
+    print("[DazzleNodes] Running git submodule update --init --recursive...")
+    try:
+        result = subprocess.run(
+            ["git", "submodule", "update", "--init", "--recursive"],
+            capture_output=True,
+            text=True,
+            timeout=120,
+            cwd=Path(__file__).parent
+        )
+        if result.returncode == 0:
+            print("[DazzleNodes] [OK] Submodules initialized successfully")
+        else:
+            print(f"[DazzleNodes] [WARN] Submodule init exited with code {result.returncode}")
+            if result.stderr:
+                for line in result.stderr.strip().split('\n'):
+                    if line:
+                        print(f"[DazzleNodes]   {line}")
+    except subprocess.TimeoutExpired:
+        print("[DazzleNodes] [WARN] Submodule init timed out after 120 seconds")
+    except FileNotFoundError:
+        print("[DazzleNodes] [WARN] git not found — cannot auto-initialize submodules")
+        print("[DazzleNodes]    Install git or run manually: git submodule update --init --recursive")
+    except Exception as e:
+        print(f"[DazzleNodes] [WARN] Submodule init failed: {e}")
+
+_init_submodules_if_needed()
+
 # Run auto-sync before loading nodes
 _sync_web_resources()
 

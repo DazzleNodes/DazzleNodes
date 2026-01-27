@@ -1,33 +1,54 @@
-# Contributing to C:/code/DazzleNodes
+# Contributing to DazzleNodes
 
-Thank you for considering contributing to C:/code/DazzleNodes!
+Thank you for considering contributing to DazzleNodes!
 
-## Code of Conduct
+## Project Structure
 
-Please note that this project is released with a Contributor Code of Conduct.
-By participating in this project you agree to abide by its terms.
+DazzleNodes is a collection of independent nodes packaged together. Each node lives in its own repository and is included here as a git submodule:
 
-## How Can I Contribute?
+```
+nodes/
+├── smart-resolution-calc/       → github.com/djdarcy/ComfyUI-Smart-Resolution-Calc
+├── fit-mask-to-image/           → github.com/DazzleNodes/fit-mask-to-image
+├── dazzle-comfy-plasma-fast/    → github.com/DazzleNodes/dazzle-comfy-plasma-fast
+└── preview-bridge-extended/     → github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended
+```
 
-### Reporting Bugs
+## Where to Contribute
 
-This section guides you through submitting a bug report.
+### Node-specific issues or features
+Open issues and PRs in the **individual node's repository**, not here. Each node has its own maintainer guidelines.
 
-### Suggesting Enhancements
+### Collection-level issues
+Open issues here for:
+- Installation problems
+- Aggregator/loader bugs (`__init__.py`)
+- Documentation improvements
+- Requests to add new nodes to the collection
 
-This section guides you through submitting an enhancement suggestion.
+## Reporting Bugs
 
-### Pull Requests
+1. Check existing issues to avoid duplicates
+2. Include your ComfyUI version and installation method (Manager, git clone, etc.)
+3. Include the relevant console output or error messages
+4. Describe what you expected vs. what happened
 
-The process described here has several goals:
-
-1. Maintain the project's quality
-2. Fix problems that are important to users
-3. Enable a sustainable system for maintainers to review contributions
-
-Please follow these steps to have your contribution considered by the maintainers:
+## Pull Requests
 
 1. Fork the repository
-2. Create a new branch
+2. Create a new branch from `main`
 3. Make your changes
-4. Submit a pull request
+4. Test in ComfyUI to verify nodes still load correctly
+5. Submit a pull request with a clear description of the change
+
+**Note:** If your PR modifies a submodule pointer, explain why the submodule update is needed.
+
+## Development Setup
+
+See the [Developer Tools guide](docs/developer-tools.md) for setting up a local development environment with `dev_mode.py`.
+
+## Support the Project
+
+If you find DazzleNodes useful, you can also support development in other ways:
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/djdarcy)

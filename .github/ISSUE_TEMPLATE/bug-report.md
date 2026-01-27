@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help improve C:/code/DazzleNodes
+about: Create a report to help improve DazzleNodes
 title: "[BUG] "
 labels: bug
 assignees: ''

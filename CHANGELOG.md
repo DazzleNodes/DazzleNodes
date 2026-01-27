@@ -5,6 +5,21 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1-alpha] - 2025-01-27
+
+### Added
+- **LICENSE** - Added MIT license file
+- **CONTRIBUTING.md** - Replaced stub with project-specific contribution guidelines
+
+### Fixed
+- **Auto-initialize submodules** on first startup when installed via ComfyUI Manager
+  - Detects empty submodule directories and runs `git submodule update --init --recursive`
+  - Skips symlinks/junctions (dev mode) to avoid clobbering local development setups
+  - Skips directories that already have content
+- **README** - Updated installation instructions to reflect published ComfyUI Registry status
+- **CODEOWNERS** - Fixed GitHub username
+- **Issue templates** - Fixed project name in bug report and feature request templates
+
 ## [0.4.0-alpha] - 2025-01-27
 
 ### Added

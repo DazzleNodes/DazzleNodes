@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for C:/code/DazzleNodes
+about: Suggest an idea for DazzleNodes
 title: "[FEATURE] "
 labels: enhancement
 assignees: ''
