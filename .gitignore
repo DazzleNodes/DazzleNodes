@@ -141,6 +141,9 @@ credentials.json
 # Add custom patterns below
 nodes_bak/
 
+# Local development config (developer-specific paths, never commit)
+scripts/dev_mode_local.yaml
+
 # Auto-generated web resources (synced from submodules) - DO NOT COMMIT
 # All generated node directories (core, smart-resolution-calc, etc)
 /web/*/

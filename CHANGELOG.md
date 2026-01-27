@@ -5,6 +5,28 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0-alpha] - 2025-01-27
+
+### Added
+- **Preview Bridge Extended** - New node for extended preview bridge functionality
+  - Added as submodule: [ComfyUI-PreviewBridgeExtended](https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended)
+
+### Changed
+- **Smart Resolution Calculator Updated** - Updated to v0.6.6
+  - Fixed crash when image mode disabled with no connected image (NoneType error)
+  - Corrected image_mode default from enabled to disabled
+  - Added safeguard for pending calculator states
+  - See [Smart Resolution Calc v0.6.6 release](https://github.com/djdarcy/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.6.6) for full details
+
+### Developer
+- **dev_mode.py** - Added local path resolution support
+  - New `dev_mode_local.yaml` config for developer-specific local paths (gitignored)
+  - New `--local` flag for `dev` command to prefer local config
+  - Added `dev_mode_local.yaml.example` template
+- **Documentation** - Added `docs/` directory
+  - `dynamic-node-loading.md` - Guide to the aggregator architecture and building your own node collection
+  - `git-submodule-workaround.md` - Workaround for silent `git submodule add` failure on Windows
+
 ## [0.3.6-alpha] - 2025-11-24
 
 ### Fixed

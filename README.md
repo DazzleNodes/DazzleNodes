@@ -47,6 +47,11 @@ GPU-accelerated noise generation with 100-200x speedup over CPU implementations.
 
 **Note:** This fork may be removed if the upstream project merges the optimization changes.
 
+### Preview Bridge Extended (standalone: **[Github](https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended)**)
+Extended preview bridge functionality for ComfyUI workflows.
+
+**Status:** Available from [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in the Comfy Registry; download from [Github](https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended) to `ComfyUI\custom_nodes` for standalone install
+
 ## Installation
 
 ### Method 1: ComfyUI Manager (Recommended - Coming Soon)
@@ -115,7 +120,9 @@ DazzleNodes/local/
 ├── __init__.py              # Aggregator that imports all nodes
 ├── nodes/                   # Node submodules
 │   ├── smart-resolution-calc/    # Submodule → separate git repo
-│   └── fit-mask-to-image/        # Submodule → separate git repo
+│   ├── fit-mask-to-image/        # Submodule → separate git repo
+│   ├── dazzle-comfy-plasma-fast/ # Submodule → separate git repo
+│   └── preview-bridge-extended/  # Submodule → separate git repo
 └── examples/                # Collection-level examples
 ```
 
@@ -124,6 +131,10 @@ DazzleNodes/local/
 - Nodes can be extracted to standalone repos later
 - Version locking prevents unexpected breakage
 - Supports selective node development
+
+The aggregator uses `importlib` to dynamically load each submodule at startup, merging all `NODE_CLASS_MAPPINGS` into a single namespace. This handles Python's inability to import from hyphenated directory names and provides fault isolation so one broken node doesn't take down the collection.
+
+For a detailed walkthrough of the loading system — including how to build your own multi-node collection — see [docs/dynamic-node-loading.md](docs/dynamic-node-loading.md).
 
 ## Development
 
@@ -150,13 +161,29 @@ git commit -m "Update fit-mask-to-image to latest"
 git push
 ```
 
+### Dev Mode and Local Paths
+
+The `dev_mode.py` script toggles nodes between dev mode (symlinks to local source repos) and publish mode (submodules). Since `.gitmodules` frequently contains GitHub URLs rather than local paths, you can configure local repo locations via `dev_mode_local.yaml`:
+
+```bash
+python scripts/dev_mode.py dev all --local    # Switch to dev mode using local paths
+python scripts/dev_mode.py publish all         # Switch back to publish mode
+```
+
+For setup instructions, configuration options, and all available developer scripts, see [docs/developer-tools.md](docs/developer-tools.md).
+
 ### Adding a New Node
 
 1. Create node repository
-2. Add as submodule: `git submodule add <repo-url> nodes/<node-name>`
-3. Update `__init__.py` to import the new node
+2. Add as submodule:
+   ```bash
+   git submodule add <repo-url> nodes/<node-name>
+   ```
+   > **Note:** `git submodule add` can silently fail on some Git versions (observed on Git 2.52.0 for Windows). If the command exits successfully but the submodule directory is empty or missing, see [docs/git-submodule-workaround.md](docs/git-submodule-workaround.md) for diagnostic steps and workarounds.
+3. Update `__init__.py` to import the new node (follow the existing `load_node_module()` pattern)
 4. Test in ComfyUI
-5. Commit changes
+5. Update version (`version.py`, `pyproject.toml`) and `CHANGELOG.md`
+6. Commit changes
 
 ## Troubleshooting
 
@@ -198,7 +225,7 @@ For collection-level issues (installation, documentation, architecture), open an
 
 Like the project?
 
-[!["Buy Me A Coffee"](https://camo.githubusercontent.com/0b448aabee402aaf7b3b256ae471e7dc66bcf174fad7d6bb52b27138b2364e47/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67)](https://www.buymeacoffee.com/djdarcy)
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/djdarcy)
 
 ## License
 

@@ -49,6 +49,9 @@ DEFAULT_CONFIG = {
     "verbose": False
 }
 
+# Local mappings file (not committed to git)
+LOCAL_MAPPINGS_FILE = "dev_mode_local.yaml"
+
 # ============================================================================
 # Configuration Loading
 # ============================================================================
@@ -125,6 +128,124 @@ def parse_gitmodules():
                 node_mappings[node_name] = url
 
     return node_mappings
+
+
+def load_local_mappings():
+    """
+    Load local path mappings from dev_mode_local.yaml.
+
+    This file is NOT committed to git and contains developer-specific
+    local paths to source repositories.
+
+    Returns:
+        dict: Mapping of node_name -> local_source_path
+              Example: {"smart-resolution-calc": "C:\\code\\smart-resolution-calc-repo\\Local"}
+    """
+    script_dir = Path(__file__).parent
+    local_config_path = script_dir / LOCAL_MAPPINGS_FILE
+
+    if not local_config_path.exists():
+        return {}
+
+    try:
+        with open(local_config_path, 'r') as f:
+            local_config = yaml.safe_load(f) or {}
+            return local_config.get('node_paths', {})
+    except Exception as e:
+        print(f"Warning: Could not load local mappings: {e}")
+        return {}
+
+
+def is_valid_local_path(path_str):
+    """
+    Check if a path string represents a valid local filesystem path.
+
+    Args:
+        path_str: Path string to check
+
+    Returns:
+        bool: True if path exists on local filesystem
+    """
+    if not path_str:
+        return False
+
+    # Check for URL patterns (not local paths)
+    if path_str.startswith(('http://', 'https://', 'git@', 'ssh://')):
+        return False
+
+    # Check if path exists
+    return Path(path_str).exists()
+
+
+def get_resolved_mappings(prefer_local=False, verbose=False):
+    """
+    Get node mappings with resolved local paths.
+
+    Resolution order:
+    1. If prefer_local=True: Check local config first, then gitmodules
+    2. Otherwise: Check gitmodules first, fall back to local config if path invalid
+
+    Args:
+        prefer_local: If True, prefer local config over gitmodules
+        verbose: If True, print resolution details
+
+    Returns:
+        dict: Mapping of node_name -> resolved_local_path
+    """
+    gitmodule_mappings = parse_gitmodules()
+    local_mappings = load_local_mappings()
+
+    resolved = {}
+
+    # Get all unique node names
+    all_nodes = set(gitmodule_mappings.keys()) | set(local_mappings.keys())
+
+    for node_name in all_nodes:
+        gitmodule_path = gitmodule_mappings.get(node_name)
+        local_path = local_mappings.get(node_name)
+
+        if prefer_local:
+            # Prefer local config
+            if local_path and is_valid_local_path(local_path):
+                resolved[node_name] = local_path
+                if verbose:
+                    print(f"  [{node_name}] Using local config: {local_path}")
+            elif gitmodule_path and is_valid_local_path(gitmodule_path):
+                resolved[node_name] = gitmodule_path
+                if verbose:
+                    print(f"  [{node_name}] Using gitmodules: {gitmodule_path}")
+            elif local_path:
+                # Local path specified but doesn't exist - still use it (will error later)
+                resolved[node_name] = local_path
+                if verbose:
+                    print(f"  [{node_name}] Using local config (NOT FOUND): {local_path}")
+            elif gitmodule_path:
+                resolved[node_name] = gitmodule_path
+                if verbose:
+                    print(f"  [{node_name}] Using gitmodules (NOT LOCAL): {gitmodule_path}")
+        else:
+            # Prefer gitmodules if it's a valid local path
+            if gitmodule_path and is_valid_local_path(gitmodule_path):
+                resolved[node_name] = gitmodule_path
+                if verbose:
+                    print(f"  [{node_name}] Using gitmodules: {gitmodule_path}")
+            elif local_path and is_valid_local_path(local_path):
+                resolved[node_name] = local_path
+                if verbose:
+                    print(f"  [{node_name}] Fallback to local config: {local_path}")
+            elif local_path:
+                # Local path specified but doesn't exist
+                resolved[node_name] = local_path
+                if verbose:
+                    print(f"  [{node_name}] Using local config (NOT FOUND): {local_path}")
+            elif gitmodule_path:
+                # gitmodule path is not local (URL) - use it anyway for error message
+                resolved[node_name] = gitmodule_path
+                if verbose:
+                    print(f"  [{node_name}] Using gitmodules (NOT LOCAL): {gitmodule_path}")
+
+    return resolved
+
 
 def is_symlink(path):
     """
@@ -456,11 +577,17 @@ def cmd_dev(args, config):
     root = get_dazzlenodes_root()
     nodes_dir = root / "nodes"
 
-    # Load node mappings from .gitmodules
-    node_mappings = parse_gitmodules()
+    # Load node mappings with local path resolution
+    prefer_local = getattr(args, 'local', False)
+    if prefer_local or config.get('verbose'):
+        print("Resolving node paths...")
+    node_mappings = get_resolved_mappings(prefer_local=prefer_local, verbose=config.get('verbose', False))
 
     if not node_mappings:
-        print("Error: No nodes found in .gitmodules")
+        print("Error: No nodes found in .gitmodules or dev_mode_local.yaml")
+        print("\nTo configure local paths, create scripts/dev_mode_local.yaml:")
+        print("  node_paths:")
+        print('    smart-resolution-calc: "C:\\\\code\\\\smart-resolution-calc-repo\\\\Local"')
         return 1
 
     # Determine which nodes to process
@@ -679,6 +806,8 @@ Examples:
                                        help="Switch node(s) to dev mode (symlinks)")
     dev_parser.add_argument("node", nargs="?",
                            help="Node name or 'all' (required)")
+    dev_parser.add_argument("--local", action="store_true",
+                           help="Prefer local config (dev_mode_local.yaml) over .gitmodules")
 
     # Publish command
     publish_parser = subparsers.add_parser("publish",

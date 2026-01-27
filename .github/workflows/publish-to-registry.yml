@@ -55,4 +55,4 @@ jobs:
 
 # Note: DazzleNodes is a collection with git submodules
 # The checkout action uses 'submodules: recursive' to include all nodes
-# WARNING: fit-mask-to-image currently uses local path - will fail until published to GitHub
+

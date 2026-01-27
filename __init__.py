@@ -137,6 +137,16 @@ except Exception as e:
     print(f"[DazzleNodes] [WARN] Could not load Plasma Noise Generators: {e}")
 
 # ============================================================================
+# Load Preview Bridge Extended
+# ============================================================================
+try:
+    num_nodes = load_node_module("preview-bridge-extended", "Preview Bridge Extended")
+    _loaded_nodes.append(f"Preview Bridge Extended ({num_nodes} nodes)")
+except Exception as e:
+    _failed_nodes.append(("Preview Bridge Extended", str(e)))
+    print(f"[DazzleNodes] [WARN] Could not load Preview Bridge Extended: {e}")
+
+# ============================================================================
 # Report Loading Status
 # ============================================================================
 if _loaded_nodes:

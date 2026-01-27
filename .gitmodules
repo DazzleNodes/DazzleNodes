@@ -7,3 +7,6 @@
 [submodule "nodes/dazzle-comfy-plasma-fast"]
 	path = nodes/dazzle-comfy-plasma-fast
 	url = https://github.com/DazzleNodes/dazzle-comfy-plasma-fast.git
+[submodule "nodes/preview-bridge-extended"]
+	path = nodes/preview-bridge-extended
+	url = https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended.git

@@ -1,0 +1,20 @@
+# DazzleNodes Local Development Paths
+#
+# Copy this file to dev_mode_local.yaml and customize for your setup.
+# This file is gitignored and should contain YOUR local development paths.
+#
+# These paths are used when:
+# 1. The .gitmodules URL is not a valid local path (e.g., GitHub URL)
+# 2. You run with --local flag to prefer local config
+#
+# Usage:
+#   python dev_mode.py dev smart-resolution-calc          # Uses gitmodules first, falls back to local
+#   python dev_mode.py dev smart-resolution-calc --local  # Prefers local config
+
+node_paths:
+  # Format: node-name: "path/to/local/repo"
+  # Use double backslashes on Windows or forward slashes
+
+  smart-resolution-calc: "C:\\code\\smart-resolution-calc-repo\\Local"
+  fit-mask-to-image: "C:\\code\\ComfyUI-ImageMask-Fix\\local"
+  dazzle-comfy-plasma-fast: "C:\\code\\dazzle-comfy-plasma-fast"
