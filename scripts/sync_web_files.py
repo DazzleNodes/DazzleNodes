@@ -24,12 +24,18 @@ from pathlib import Path
 import argparse
 import hashlib
 import time
+import os
 
 # ============================================================================
 # Configuration
 # ============================================================================
 
-# Web resource sources (priority order)
+# Resolve project root relative to this script's location (scripts/ -> parent)
+# This ensures the sync works regardless of the caller's working directory.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_PROJECT_ROOT = _SCRIPT_DIR.parent
+
+# Web resource sources (priority order) — relative to project root
 WEB_SOURCES = [
     ("web_src/core", "core"),           # Shared libraries (highest priority)
     ("core_nodes", "core_nodes"),       # Built-in nodes
@@ -48,7 +54,7 @@ def detect_dev_mode():
         "dev" if ANY node is a symlink (development workflow)
         "prod" if ALL nodes are real directories (production/submodule workflow)
     """
-    nodes_dir = Path("nodes")
+    nodes_dir = _PROJECT_ROOT / "nodes"
     if not nodes_dir.exists():
         return "prod"  # Default
 
@@ -76,7 +82,7 @@ def compute_source_hash(source_dirs):
     hasher = hashlib.md5()
 
     for source_dir, _ in source_dirs:
-        source_path = Path(source_dir)
+        source_path = _PROJECT_ROOT / source_dir
         if not source_path.exists():
             continue
 
@@ -179,7 +185,7 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
         dict with sync stats
     """
     start_time = time.time()
-    web_dir = Path("web")
+    web_dir = _PROJECT_ROOT / "web"
 
     # Note: Always copy files (ComfyUI web server doesn't follow symlinks)
     if not quiet:
@@ -214,7 +220,7 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
 
     # Process each source
     for source_path_str, source_type in WEB_SOURCES:
-        source_path = Path(source_path_str)
+        source_path = _PROJECT_ROOT / source_path_str
 
         if not source_path.exists():
             if verbose:

@@ -47,6 +47,20 @@ GPU-accelerated noise generation with 100-200x speedup over CPU implementations.
 
 **Note:** This fork may be removed if the upstream project merges the optimization changes.
 
+### Dazzle Switch (standalone: **[Github](https://github.com/DazzleNodes/ComfyUI-DazzleSwitch)**)
+Smart switch node with dropdown-based input selection and INT override for cascading workflows. Route any data type through a named dropdown instead of moving noodles.
+
+**Features:**
+- Dynamic input expansion (auto-grow/shrink slots as you connect)
+- `select` dropdown populated with connected input names (supports user renames)
+- `select_override` INT input for programmatic cascading across chained switches
+- Type detection via graph walking with output type label
+- Slot reordering (right-click Move Up / Move Down) for cascading alignment
+- Active slot highlight for visual feedback
+- Label cache preserves user renames across disconnect/reconnect cycles
+
+**Status:** Available from [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in the Comfy Registry; download from [Github](https://github.com/DazzleNodes/ComfyUI-DazzleSwitch) to `ComfyUI\custom_nodes` for standalone install
+
 ### Preview Bridge Extended (standalone: **[Github](https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended)**)
 Extended preview bridge functionality for ComfyUI workflows.
 
@@ -121,7 +135,8 @@ DazzleNodes/local/
 │   ├── smart-resolution-calc/    # Submodule → separate git repo
 │   ├── fit-mask-to-image/        # Submodule → separate git repo
 │   ├── dazzle-comfy-plasma-fast/ # Submodule → separate git repo
-│   └── preview-bridge-extended/  # Submodule → separate git repo
+│   ├── dazzle-switch/              # Submodule → separate git repo
+│   └── preview-bridge-extended/    # Submodule → separate git repo
 └── examples/                # Collection-level examples
 ```
 

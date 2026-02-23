@@ -10,3 +10,6 @@
 [submodule "nodes/preview-bridge-extended"]
 	path = nodes/preview-bridge-extended
 	url = https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended.git
+[submodule "nodes/dazzle-switch"]
+	path = nodes/dazzle-switch
+	url = https://github.com/DazzleNodes/ComfyUI-DazzleSwitch.git

@@ -5,6 +5,23 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0-alpha] - 2026-02-23
+
+### Added
+- **Dazzle Switch** - New smart switch node with dropdown-based input selection
+  - Added as submodule: [ComfyUI-DazzleSwitch](https://github.com/DazzleNodes/ComfyUI-DazzleSwitch) (v0.3.1-alpha)
+  - Dynamic input expansion (auto-grow/shrink slots)
+  - Type detection via graph walking with output type label
+  - Slot reordering (right-click Move Up / Move Down) for cascading alignment
+  - `selected_index` → `select_override` cascading across chained switches
+  - Label cache preserves user renames across reconnect cycles
+  - Active slot highlight for visual feedback
+
+### Changed
+- **Web sync script** - Fixed CWD-independent path resolution
+  - Uses `Path(__file__).resolve().parent.parent` instead of relative paths
+  - Sync now works correctly when called from any working directory
+
 ## [0.4.1-alpha] - 2025-01-27
 
 ### Added

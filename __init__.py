@@ -209,6 +209,16 @@ except Exception as e:
     print(f"[DazzleNodes] [WARN] Could not load Preview Bridge Extended: {e}")
 
 # ============================================================================
+# Load Dazzle Switch
+# ============================================================================
+try:
+    num_nodes = load_node_module("dazzle-switch", "Dazzle Switch")
+    _loaded_nodes.append(f"Dazzle Switch ({num_nodes} nodes)")
+except Exception as e:
+    _failed_nodes.append(("Dazzle Switch", str(e)))
+    print(f"[DazzleNodes] [WARN] Could not load Dazzle Switch: {e}")
+
+# ============================================================================
 # Report Loading Status
 # ============================================================================
 if _loaded_nodes:
