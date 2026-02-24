@@ -149,6 +149,7 @@ scripts/dev_mode_local.yaml
 /web/*/
 # Sync metadata files (hash cache)
 /web/.sync_hash
+/web/.sync_hashes.json
 # Explicitly allow web directory documentation
 !/web/README.md
 !/web/*.md

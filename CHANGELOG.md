@@ -5,6 +5,21 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1-alpha] - 2026-02-24
+
+### Changed
+- **Dazzle Switch** updated to [v0.4.0-alpha](https://github.com/DazzleNodes/ComfyUI-DazzleSwitch/releases/tag/v0.4.0-alpha)
+  - Fallback modes: `priority` (rgthree-style), `strict` (no fallback), `sequential` (next slot with wrap-around)
+  - `(none)` dropdown option: skip dropdown, let mode decide (6-behavior matrix)
+  - Negative indexing: `select_override = -1` selects last connected, `-2` second-to-last, etc.
+  - Widget dimming: `select_override` dims at 35% opacity when value is 0
+  - Sequential mode gap fix: correctly scans through disconnected slot positions
+  - 86 tests (31 new)
+- **Web sync script** rewritten with per-node caching
+  - Each node's web files hashed independently (`.sync_hashes.json`)
+  - Symlinked nodes (dev mode) always sync; submodule nodes cache by content hash
+  - Scales efficiently to large node collections (no global re-sync)
+
 ## [0.5.0-alpha] - 2026-02-23
 
 ### Added

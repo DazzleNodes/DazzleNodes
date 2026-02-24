@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="ComfyUI-DazzleNodes",
-    version="0.5.0",
+    version="0.5.1",
     description="A curated collection of image/latent creation and transformation custom nodes for ComfyUI",
     author="Dustin",
     author_email="6962246+djdarcy@users.noreply.github.com",

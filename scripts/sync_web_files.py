@@ -10,28 +10,32 @@ Sources (priority order):
 Target:
 - web/*/ (generated, gitignored)
 
+Caching:
+- Per-node content hashes stored in web/.sync_hashes.json
+- Symlinked nodes (dev mode) always sync — dev files change frequently
+- Submodule nodes only sync when content hash changes
+- --force bypasses all cache checks
+
 Usage:
-    python sync_web_files.py              # Auto-detect mode, use cache
-    python sync_web_files.py --mode=dev   # Force dev mode (symlinks)
-    python sync_web_files.py --mode=prod  # Force prod mode (copies)
-    python sync_web_files.py --force      # Skip cache check
+    python sync_web_files.py              # Auto-detect, per-node caching
+    python sync_web_files.py --force      # Skip all cache checks
     python sync_web_files.py --quiet      # Suppress output
+    python sync_web_files.py --verbose    # Extra debug info
 """
 
 import sys
+import json
 import shutil
 from pathlib import Path
 import argparse
 import hashlib
 import time
-import os
 
 # ============================================================================
 # Configuration
 # ============================================================================
 
 # Resolve project root relative to this script's location (scripts/ -> parent)
-# This ensures the sync works regardless of the caller's working directory.
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PROJECT_ROOT = _SCRIPT_DIR.parent
 
@@ -42,142 +46,141 @@ WEB_SOURCES = [
     ("nodes", "nodes"),                 # Submodules/symlinks
 ]
 
+# Cache file for per-node hashes
+_HASH_FILE = ".sync_hashes.json"
+
+# Legacy single-hash file (cleaned up on first run)
+_LEGACY_HASH_FILE = ".sync_hash"
+
 # ============================================================================
-# Mode Detection
+# Per-Node Hashing
 # ============================================================================
 
-def detect_dev_mode():
-    """
-    Detect if we're in dev or prod mode by checking if nodes/* are symlinks.
+def compute_node_hash(web_source_dir):
+    """Compute content hash for a single node's web/ directory.
+
+    Hashes every .js file's relative path and content. The relative path
+    ensures the hash changes if files are renamed or reorganized, while
+    keeping it stable across different machines (no absolute paths).
+
+    Args:
+        web_source_dir: Path to the node's web/ source directory
 
     Returns:
-        "dev" if ANY node is a symlink (development workflow)
-        "prod" if ALL nodes are real directories (production/submodule workflow)
+        str: MD5 hex digest of all .js files in the directory
     """
-    nodes_dir = _PROJECT_ROOT / "nodes"
-    if not nodes_dir.exists():
-        return "prod"  # Default
-
-    # Check ALL nodes - if ANY is a symlink, we're in dev mode
-    has_symlink = False
-    has_real_dir = False
-
-    for node_dir in nodes_dir.iterdir():
-        if node_dir.is_dir():
-            if node_dir.is_symlink():
-                has_symlink = True
-            else:
-                has_real_dir = True
-
-    # If ANY node is a symlink, treat as dev mode
-    # (Allows mixed state during transition)
-    return "dev" if has_symlink else "prod"
-
-# ============================================================================
-# Caching (avoid unnecessary syncs)
-# ============================================================================
-
-def compute_source_hash(source_dirs):
-    """Compute hash of all source web files for change detection."""
     hasher = hashlib.md5()
-
-    for source_dir, _ in source_dirs:
-        source_path = _PROJECT_ROOT / source_dir
-        if not source_path.exists():
-            continue
-
-        # Hash all .js files in web/ subdirectories
-        for js_file in sorted(source_path.rglob("web/**/*.js")):
-            if js_file.is_file():
-                hasher.update(str(js_file).encode())
-                try:
-                    hasher.update(js_file.read_bytes())
-                except:
-                    pass  # Skip unreadable files
-
-        # Also hash direct .js files in web_src/core (no web/ subdir)
-        if source_path.name == "core" and source_path.parent.name == "web_src":
-            for js_file in sorted(source_path.glob("*.js")):
-                if js_file.is_file():
-                    hasher.update(str(js_file).encode())
-                    try:
-                        hasher.update(js_file.read_bytes())
-                    except:
-                        pass
-
+    for js_file in sorted(web_source_dir.rglob("**/*.js")):
+        if js_file.is_file():
+            rel = js_file.relative_to(web_source_dir)
+            hasher.update(str(rel).encode())
+            try:
+                hasher.update(js_file.read_bytes())
+            except Exception:
+                pass
     return hasher.hexdigest()
 
-def needs_sync(web_dir, source_hash):
-    """Check if sync needed by comparing hashes."""
-    hash_file = web_dir / ".sync_hash"
 
+def compute_core_hash(core_dir):
+    """Compute content hash for web_src/core/ (flat .js files, no web/ subdir).
+
+    Args:
+        core_dir: Path to web_src/core/
+
+    Returns:
+        str: MD5 hex digest of all .js files
+    """
+    hasher = hashlib.md5()
+    for js_file in sorted(core_dir.glob("*.js")):
+        if js_file.is_file():
+            hasher.update(js_file.name.encode())
+            try:
+                hasher.update(js_file.read_bytes())
+            except Exception:
+                pass
+    return hasher.hexdigest()
+
+
+def load_cached_hashes(web_dir):
+    """Load per-node hash cache from .sync_hashes.json.
+
+    Returns:
+        dict: Mapping of node_name -> hash string
+    """
+    hash_file = web_dir / _HASH_FILE
     if not hash_file.exists():
-        return True  # First sync
-
+        return {}
     try:
-        cached_hash = hash_file.read_text().strip()
-        return cached_hash != source_hash
-    except Exception as e:
-        print(f"[DazzleNodes] Warning: Could not read sync hash ({e}), forcing sync")
-        return True  # Assume sync needed on error
+        return json.loads(hash_file.read_text())
+    except Exception:
+        return {}
 
-def save_sync_hash(web_dir, source_hash):
-    """Save current source hash."""
-    hash_file = web_dir / ".sync_hash"
-    hash_file.write_text(source_hash)
+
+def save_cached_hashes(web_dir, hashes):
+    """Save per-node hash cache to .sync_hashes.json.
+
+    Args:
+        web_dir: Path to web/ directory
+        hashes: dict mapping node_name -> hash string
+    """
+    hash_file = web_dir / _HASH_FILE
+    hash_file.write_text(json.dumps(hashes, indent=2) + "\n")
+
+
+def cleanup_legacy_hash(web_dir):
+    """Remove legacy single-hash .sync_hash file if present."""
+    legacy = web_dir / _LEGACY_HASH_FILE
+    if legacy.exists():
+        try:
+            legacy.unlink()
+        except Exception:
+            pass
 
 # ============================================================================
 # Sync Logic
 # ============================================================================
 
-def create_link_or_copy(source_file, target_file, use_symlink=True, verbose=False):
-    """
-    Create symlink to source file, or copy if symlink fails.
+def sync_node_files(web_source, target_dir, verbose=False):
+    """Copy all .js files from a node's web/ source to its target directory.
+
+    Preserves directory structure for nested files (e.g., managers/, utils/).
 
     Args:
-        source_file: Source file path
-        target_file: Target file path
-        use_symlink: Try to create symlink (True) or just copy (False)
+        web_source: Source web/ directory path
+        target_dir: Target directory in web/<node_name>/
         verbose: Print debug info
 
     Returns:
-        "symlink", "copy", or "failed"
+        int: Number of files copied
     """
-    if not source_file.exists() or not source_file.is_file():
-        if verbose:
-            print(f"    [!] Source not found: {source_file}")
-        return "failed"
-
-    if use_symlink:
+    copied = 0
+    for js_file in web_source.rglob("**/*.js"):
+        if not js_file.is_file():
+            continue
+        rel_path = js_file.relative_to(web_source)
+        target_file = target_dir / rel_path
+        target_file.parent.mkdir(parents=True, exist_ok=True)
         try:
-            # Try creating symlink with relative path
-            target_file.symlink_to(source_file)
+            shutil.copy2(js_file, target_file)
+            copied += 1
             if verbose:
-                print(f"    [LINK] Symlinked: {target_file.name}")
-            return "symlink"
-        except (OSError, NotImplementedError) as e:
+                print(f"    [COPY] {rel_path}")
+        except Exception as e:
             if verbose:
-                print(f"    [!] Symlink failed ({e}), copying instead")
-            # Fall through to copy
+                print(f"    [X] Failed: {rel_path} ({e})")
+    return copied
 
-    # Copy file
-    try:
-        shutil.copy2(source_file, target_file)
-        if verbose:
-            print(f"    [COPY] Copied: {target_file.name}")
-        return "copy"
-    except Exception as e:
-        if verbose:
-            print(f"    [X] Copy failed: {e}")
-        return "failed"
 
 def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
-    """
-    Main sync function.
+    """Main sync function with per-node caching.
+
+    Each node's web files are hashed independently. Only nodes with changed
+    content are re-synced. Symlinked nodes (dev mode) always sync regardless
+    of hash — dev files change frequently and sync is fast.
 
     Args:
-        mode: Deprecated, ignored (always copies files for ComfyUI compatibility)
-        force: Skip cache check, always sync
+        mode: Deprecated, ignored
+        force: Skip all cache checks, sync everything
         quiet: Suppress output
         verbose: Extra debug output
 
@@ -186,84 +189,71 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
     """
     start_time = time.time()
     web_dir = _PROJECT_ROOT / "web"
-
-    # Note: Always copy files (ComfyUI web server doesn't follow symlinks)
-    if not quiet:
-        print(f"[DazzleNodes] Syncing web resources...")
-
-    # Check if sync needed (unless forced)
-    source_hash = compute_source_hash(WEB_SOURCES)
-    if not force:
-        if not needs_sync(web_dir, source_hash):
-            if not quiet:
-                print("[DazzleNodes] Web resources up-to-date (cached)")
-            return {
-                "cached": True,
-                "nodes": 0,
-                "files": 0,
-                "time": time.time() - start_time
-            }
-
-    # Create web directory if needed
     web_dir.mkdir(exist_ok=True)
 
-    # Create temp directory for atomic operation
-    temp_dir = web_dir / ".sync_temp"
-    if temp_dir.exists():
-        shutil.rmtree(temp_dir)
-    temp_dir.mkdir()
+    # Clean up legacy single-hash file on first run
+    cleanup_legacy_hash(web_dir)
 
-    # Track seen node names (prevent duplicates)
-    seen_nodes = {}
+    cached_hashes = load_cached_hashes(web_dir)
+    new_hashes = {}
+
+    # Track stats
+    synced_nodes = []
+    skipped_nodes = []
     total_files = 0
-    copy_count = 0
+
+    if not quiet:
+        print("[DazzleNodes] Syncing web resources...")
 
     # Process each source
     for source_path_str, source_type in WEB_SOURCES:
         source_path = _PROJECT_ROOT / source_path_str
-
         if not source_path.exists():
             if verbose:
                 print(f"  [Skip] {source_path} does not exist")
             continue
 
-        # Special case: web_src/core has .js files directly (no web/ subdir)
+        # Special case: web_src/core (flat .js files, no web/ subdir)
         if source_type == "core" and source_path.name == "core":
-            if verbose:
-                print(f"  [Core] Processing {source_path}")
+            current_hash = compute_core_hash(source_path)
+            new_hashes["_core"] = current_hash
 
-            target_dir = temp_dir / "core"
+            if not force and cached_hashes.get("_core") == current_hash:
+                skipped_nodes.append("core")
+                if verbose:
+                    print(f"  [Core] Up-to-date (cached)")
+                continue
+
+            target_dir = web_dir / "core"
+            # Remove stale target and recreate
+            if target_dir.exists():
+                shutil.rmtree(target_dir)
             target_dir.mkdir(exist_ok=True)
 
+            core_files = 0
             for js_file in source_path.glob("*.js"):
                 target_file = target_dir / js_file.name
+                try:
+                    shutil.copy2(js_file, target_file)
+                    core_files += 1
+                except Exception as e:
+                    if verbose:
+                        print(f"    [X] Failed: {js_file.name} ({e})")
 
-                # Always copy (ComfyUI web server doesn't follow symlinks)
-                result = create_link_or_copy(
-                    js_file,
-                    target_file,
-                    use_symlink=False,
-                    verbose=verbose
-                )
-
-                if result == "copy":
-                    copy_count += 1
-                    total_files += 1
-
-            if not quiet and total_files > 0:
-                print(f"  [Core] Synced core library ({total_files} files)")
-
+            total_files += core_files
+            synced_nodes.append("core")
+            if not quiet:
+                print(f"  [Core] Synced core library ({core_files} files)")
             continue
 
         # Normal case: scan for nodes with web/ directories
         if verbose:
             print(f"  [Scan] {source_path}")
 
-        for node_dir in source_path.iterdir():
+        for node_dir in sorted(source_path.iterdir()):
             if not node_dir.is_dir():
                 continue
 
-            # Check for web/ subdirectory
             web_source = node_dir / "web"
             if not web_source.exists():
                 if verbose:
@@ -271,96 +261,63 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
                 continue
 
             node_name = node_dir.name
+            is_symlink = node_dir.is_symlink()
 
-            # Check for duplicate names across sources
-            if node_name in seen_nodes:
-                print(f"\n[DazzleNodes] ERROR: Duplicate node name '{node_name}'")
-                print(f"  Source 1: {seen_nodes[node_name]}")
-                print(f"  Source 2: {node_dir}")
-                print(f"\nPlease rename one of these nodes to avoid conflicts.")
-                sys.exit(1)
+            # Compute current content hash
+            current_hash = compute_node_hash(web_source)
+            new_hashes[node_name] = current_hash
 
-            seen_nodes[node_name] = str(node_dir)
+            # Determine if this node needs syncing:
+            # - force: always sync everything
+            # - symlink (dev mode): always sync — dev files change frequently
+            # - hash mismatch: content changed since last sync
+            needs_update = force or is_symlink or (cached_hashes.get(node_name) != current_hash)
 
-            # Create target directory and copy files
-            # (Always copy - ComfyUI web server doesn't follow symlinks)
-            target_dir = temp_dir / node_name
+            if not needs_update:
+                skipped_nodes.append(node_name)
+                if verbose:
+                    print(f"    [{source_type}] {node_name} — up-to-date (cached)")
+                continue
+
+            # Determine why we're syncing (for logging)
+            if verbose or (not quiet and is_symlink):
+                reason = "dev mode" if is_symlink else ("forced" if force else "changed")
+                print(f"  [{source_type}] {node_name} — syncing ({reason})")
+
+            # Remove stale target and recreate
+            target_dir = web_dir / node_name
+            if target_dir.exists():
+                shutil.rmtree(target_dir)
             target_dir.mkdir(exist_ok=True)
 
-            node_files = 0
-
-            # Use rglob to recursively find all .js files in subdirectories
-            for js_file in web_source.rglob("**/*.js"):
-                # Preserve directory structure relative to web_source
-                rel_path = js_file.relative_to(web_source)
-                target_file = target_dir / rel_path
-
-                # Create parent directories if needed (e.g., managers/, utils/)
-                target_file.parent.mkdir(parents=True, exist_ok=True)
-
-                result = create_link_or_copy(
-                    js_file,
-                    target_file,
-                    use_symlink=False,
-                    verbose=verbose
-                )
-
-                if result == "copy":
-                    copy_count += 1
-                    node_files += 1
-
+            node_files = sync_node_files(web_source, target_dir, verbose=verbose)
             total_files += node_files
+            synced_nodes.append(node_name)
 
-            if not quiet and node_files > 0:
-                print(f"  [{source_type}] {node_name} ({node_files} files)")
+            if not quiet and not verbose:
+                if not is_symlink:
+                    print(f"  [{source_type}] {node_name} ({node_files} files)")
 
-    # Atomic replace: Move temp to final location
-    old_dir = web_dir / ".sync_old"
-    if old_dir.exists():
-        shutil.rmtree(old_dir)
-    old_dir.mkdir()
-
-    # Move current web/* to .sync_old (preserve README.md, .sync_hash)
-    for item in web_dir.iterdir():
-        if item.name not in [".sync_temp", ".sync_hash", ".sync_old", "README.md"]:
-            try:
-                item.rename(old_dir / item.name)
-            except:
-                pass  # Ignore errors, will be overwritten
-
-    # Move temp contents to web/
-    for item in temp_dir.iterdir():
-        try:
-            item.rename(web_dir / item.name)
-        except Exception as e:
-            if not quiet:
-                print(f"  [!] Failed to move {item.name}: {e}")
-
-    # Cleanup
-    try:
-        temp_dir.rmdir()
-    except:
-        pass
-
-    if old_dir.exists():
-        try:
-            shutil.rmtree(old_dir)
-        except:
-            pass
-
-    # Save hash
-    save_sync_hash(web_dir, source_hash)
+    # Save updated per-node hashes
+    save_cached_hashes(web_dir, new_hashes)
 
     elapsed = time.time() - start_time
 
     if not quiet:
-        print(f"[DazzleNodes] Synced {len(seen_nodes)} nodes, {total_files} files ({copy_count} copies) in {elapsed:.2f}s")
+        if synced_nodes:
+            print(f"[DazzleNodes] Synced {len(synced_nodes)} node(s), "
+                  f"{total_files} files in {elapsed:.2f}s")
+            if skipped_nodes and verbose:
+                print(f"[DazzleNodes] Skipped {len(skipped_nodes)} unchanged node(s): "
+                      f"{', '.join(skipped_nodes)}")
+        else:
+            print(f"[DazzleNodes] All {len(skipped_nodes)} node(s) up-to-date (cached)")
 
     return {
-        "cached": False,
-        "nodes": len(seen_nodes),
+        "cached": len(synced_nodes) == 0,
+        "nodes": len(synced_nodes),
+        "skipped": len(skipped_nodes),
         "files": total_files,
-        "copies": copy_count,
         "time": elapsed
     }
 
@@ -370,21 +327,27 @@ def sync_web_files(mode=None, force=False, quiet=False, verbose=False):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Sync DazzleNodes web resources (always copies files)",
+        description="Sync DazzleNodes web resources (per-node caching)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python sync_web_files.py                  # Use cache, sync only if changed
-  python sync_web_files.py --force          # Skip cache, always sync
+  python sync_web_files.py                  # Use per-node cache
+  python sync_web_files.py --force          # Skip all caches, sync everything
   python sync_web_files.py --quiet          # Suppress output
   python sync_web_files.py --verbose        # Extra debug info
 
-Note: Always copies files (ComfyUI web server doesn't follow symlinks)
+Caching:
+  - Submodule nodes: cached by content hash, only sync when changed
+  - Symlinked nodes (dev mode): always sync, no cache check
+  - Per-node hashes stored in web/.sync_hashes.json
         """
     )
-    parser.add_argument("--force", action="store_true", help="Skip cache check, always sync")
-    parser.add_argument("--quiet", action="store_true", help="Suppress output")
-    parser.add_argument("--verbose", action="store_true", help="Extra debug output")
+    parser.add_argument("--force", action="store_true",
+                        help="Skip all cache checks, sync everything")
+    parser.add_argument("--quiet", action="store_true",
+                        help="Suppress output")
+    parser.add_argument("--verbose", action="store_true",
+                        help="Extra debug output")
 
     args = parser.parse_args()
 
@@ -397,11 +360,10 @@ Note: Always copies files (ComfyUI web server doesn't follow symlinks)
 
         if args.verbose and not args.quiet:
             print(f"\nSync Stats:")
-            print(f"  Cached: {stats['cached']}")
-            print(f"  Nodes: {stats['nodes']}")
+            print(f"  All cached: {stats['cached']}")
+            print(f"  Synced: {stats['nodes']}")
+            print(f"  Skipped: {stats['skipped']}")
             print(f"  Files: {stats['files']}")
-            if not stats['cached']:
-                print(f"  Copies: {stats.get('copies', 0)}")
             print(f"  Time: {stats['time']:.3f}s")
 
     except Exception as e:
