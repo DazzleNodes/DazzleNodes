@@ -5,6 +5,21 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2-alpha] - 2026-03-01
+
+### Changed
+- **Smart Resolution Calculator** updated to [v0.6.8](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.6.8)
+  - Fixed empty latent crash for non-SD1.5 VAEs (FLUX, patchified, Stable Cascade, Cosmos)
+  - Latent now queries VAE for channel count and spatial compression ratio
+  - Traffic analytics via ghtraf
+  - See [v0.6.7](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.6.7) and [v0.6.8](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.6.8) release notes
+
+### Added
+- **Traffic analytics** via [GitHub Traffic Tracker](https://github.com/djdarcy/github-traffic-tracker)
+  - GitHub Actions workflow for daily traffic collection
+  - Shields.io badges for installs and views
+  - Static HTML dashboard at docs/stats/
+
 ## [0.5.1-alpha] - 2026-02-24
 
 ### Changed

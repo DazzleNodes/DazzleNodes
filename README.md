@@ -3,6 +3,8 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![ComfyUI Registry](https://img.shields.io/badge/ComfyUI-Registry-green.svg)](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes)
 [![GitHub release](https://img.shields.io/github/v/release/DazzleNodes/DazzleNodes?include_prereleases&label=version)](https://github.com/DazzleNodes/DazzleNodes/releases)
+[![Installs](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/djdarcy/271ae4a1d7d489808d9f3ebfa2f48d6f/raw/installs.json)](https://dazzlenodes.github.io/DazzleNodes/stats/#installs)
+[![Views](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/djdarcy/271ae4a1d7d489808d9f3ebfa2f48d6f/raw/views.json)](https://dazzlenodes.github.io/DazzleNodes/stats/#views)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A curated collection of image/latent creation and transformation custom nodes for ComfyUI. Each node is independently developed and maintained, but packaged together for convenient installation.
@@ -21,7 +23,30 @@ Flexible resolution and latent generation with intelligent aspect ratio handling
 
 **Status:** Published standalone in [ComfyUI Registry](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-smart-resolution-calc) and in [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in ComfyUI Registry
 
+### Preview Bridge Extended (standalone: **[Github](https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended)**)
+
+Extended preview bridge functionality for ComfyUI workflows.
+
+**Status:** Available from [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in the Comfy Registry; download from [Github](https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended) to `ComfyUI\custom_nodes` for standalone install
+
+### Dazzle Switch (standalone: **[Github](https://github.com/DazzleNodes/ComfyUI-DazzleSwitch)**)
+
+Smart switch node with dropdown-based input selection and INT override for cascading workflows. Route any data type through a named dropdown instead of moving noodles.
+
+**Features:**
+
+- Dynamic input expansion (auto-grow/shrink slots as you connect)
+- `select` dropdown populated with connected input names (supports user renames)
+- `select_override` INT input for programmatic cascading across chained switches
+- Type detection via graph walking with output type label
+- Slot reordering (right-click Move Up / Move Down) for cascading alignment
+- Active slot highlight for visual feedback
+- Label cache preserves user renames across disconnect/reconnect cycles
+
+**Status:** Available from [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in the Comfy Registry; download from [Github](https://github.com/DazzleNodes/ComfyUI-DazzleSwitch) to `ComfyUI\custom_nodes` for standalone install
+
 ### Fit Mask to Image (standalone: **[Github](https://github.com/DazzleNodes/fit-mask-to-image)**)
+
 Automatically resizes masks to match image dimensions for inpainting workflows (for when the ksampler output dimensions no longer matches the input mask dimensions)
 
 **Features:**
@@ -46,25 +71,6 @@ GPU-accelerated noise generation with 100-200x speedup over CPU implementations.
 - Backwards compatible with original RandNoise node
 
 **Note:** This fork may be removed if the upstream project merges the optimization changes.
-
-### Dazzle Switch (standalone: **[Github](https://github.com/DazzleNodes/ComfyUI-DazzleSwitch)**)
-Smart switch node with dropdown-based input selection and INT override for cascading workflows. Route any data type through a named dropdown instead of moving noodles.
-
-**Features:**
-- Dynamic input expansion (auto-grow/shrink slots as you connect)
-- `select` dropdown populated with connected input names (supports user renames)
-- `select_override` INT input for programmatic cascading across chained switches
-- Type detection via graph walking with output type label
-- Slot reordering (right-click Move Up / Move Down) for cascading alignment
-- Active slot highlight for visual feedback
-- Label cache preserves user renames across disconnect/reconnect cycles
-
-**Status:** Available from [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in the Comfy Registry; download from [Github](https://github.com/DazzleNodes/ComfyUI-DazzleSwitch) to `ComfyUI\custom_nodes` for standalone install
-
-### Preview Bridge Extended (standalone: **[Github](https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended)**)
-Extended preview bridge functionality for ComfyUI workflows.
-
-**Status:** Available from [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in the Comfy Registry; download from [Github](https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended) to `ComfyUI\custom_nodes` for standalone install
 
 ## Installation
 

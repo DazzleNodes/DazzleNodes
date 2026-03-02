@@ -1,0 +1,13 @@
+{
+  "owner": "DazzleNodes",
+  "repo": "DazzleNodes",
+  "created": "2025-11-02",
+  "display_name": "DazzleNodes Collection",
+  "badge_gist_id": "271ae4a1d7d489808d9f3ebfa2f48d6f",
+  "archive_gist_id": "cc1e4af1cdf966bc5da3fac009de988a",
+  "dashboard_dir": "docs/stats",
+  "schema_version": 1,
+  "ci_workflows": [
+    "Publish to ComfyUI Registry"
+  ]
+}
