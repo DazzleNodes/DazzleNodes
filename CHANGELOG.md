@@ -5,6 +5,17 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.4-alpha] - 2026-03-14
+
+### Changed
+- **Smart Resolution Calculator** updated to [v0.8.2](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.8.2)
+  - Spectral blending — inject noise pattern spatial structure into latent for composition control
+  - Seed widget with randomize/fix/recall buttons for reproducible noise generation
+  - 5D video VAE support (Wan/Qwen/HunyuanVideo) — fixes crash on empty latent decode
+  - Raw latent noise output with `use_as_noise` flag for sampler integration
+  - `fill_type` always visible, `resolution` output replaced by `seed` INT output
+  - See [v0.8.2](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.8.2) release notes
+
 ## [0.5.3-alpha] - 2026-03-06
 
 ### Changed
