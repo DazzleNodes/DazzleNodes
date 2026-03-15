@@ -5,6 +5,15 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.5-alpha] - 2026-03-14
+
+### Changed
+- **Smart Resolution Calculator** updated to [v0.8.4](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.8.4)
+  - Fixed seed serialization — actual seed saved in workflow JSON for reproducibility
+  - Persistent random mode with dice button toggle
+  - Simplified from 106 to 62 lines using copy-return pattern
+  - See [v0.8.4](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.8.4) release notes
+
 ## [0.5.4-alpha] - 2026-03-14
 
 ### Changed
