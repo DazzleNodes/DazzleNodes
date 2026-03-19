@@ -520,9 +520,15 @@ def cmd_status(args, config):
         exists = node_path.exists()
         is_link = is_symlink(node_path) if exists else False
 
+        # Check for disabled marker
+        is_disabled = (node_path / "DISABLED").exists() if exists else False
+
         if not exists:
             print(f"   Status: [X] MISSING")
             print(f"   Expected: {node_path}")
+        elif is_disabled:
+            print(f"   Status: [-] DISABLED (loading skipped)")
+            print(f"   Path: {node_path}")
         elif is_link:
             print(f"   Status: [L] DEV MODE (symlink)")
             print(f"   Target: {node_path.resolve()}")
@@ -760,6 +766,178 @@ def cmd_publish(args, config):
 # Main Entry Point
 # ============================================================================
 
+def cmd_disable(args, config):
+    """Disable node(s) — prevents loading without removing the submodule."""
+    root = get_dazzlenodes_root()
+    nodes_dir = root / "nodes"
+    node_mappings = parse_gitmodules()
+
+    if not node_mappings:
+        print("Error: No nodes found in .gitmodules")
+        return 1
+
+    if args.node == "all":
+        nodes_to_process = list(node_mappings.keys())
+    elif args.node in node_mappings:
+        nodes_to_process = [args.node]
+    else:
+        print(f"Error: Unknown node '{args.node}'")
+        print(f"Available nodes: {', '.join(node_mappings.keys())}")
+        return 1
+
+    print(f"\n{'='*70}")
+    print(f"DISABLING NODES")
+    print(f"{'='*70}\n")
+
+    if args.dry_run:
+        print("[DRY-RUN] - No changes will be made\n")
+
+    success_count = 0
+    for node_name in nodes_to_process:
+        node_path = nodes_dir / node_name
+        disabled_marker = node_path / "DISABLED"
+
+        print(f"Processing: {node_name}")
+
+        if disabled_marker.exists():
+            # Already disabled, but still clean web cache if present
+            web_dir = root / "web" / node_name
+            if web_dir.exists():
+                if not args.dry_run:
+                    shutil.rmtree(web_dir)
+                    print(f"  [i] Already disabled (cleaned stale web cache)")
+                else:
+                    print(f"  [i] Already disabled (would clean stale web cache at {web_dir})")
+            else:
+                print(f"  [i] Already disabled")
+            success_count += 1
+            continue
+
+        if not args.dry_run:
+            # Backup existing content if present
+            if node_path.exists() and not args.no_backup and config["backup_enabled"]:
+                backup_path = backup_node(node_path, args.verbose)
+                if not backup_path:
+                    print(f"  [X] Backup failed, aborting")
+                    continue
+
+            # Remove existing content (submodule or symlink)
+            if node_path.exists():
+                if not remove_path(node_path, args.verbose):
+                    print(f"  [X] Failed to remove existing path")
+                    continue
+
+            # Create empty directory with DISABLED marker and placeholder __init__.py
+            node_path.mkdir(exist_ok=True)
+            disabled_marker.write_text(f"Node disabled by dev_mode.py\nUse 'python dev_mode.py enable {node_name}' to re-enable\n")
+            # Placeholder __init__.py prevents DazzleNodes auto-init from restoring submodule
+            (node_path / "__init__.py").write_text("# Disabled node - placeholder to prevent submodule auto-init\n")
+
+            # Clean cached web files to prevent JS double-loading
+            web_dir = root / "web" / node_name
+            if web_dir.exists():
+                shutil.rmtree(web_dir)
+                if args.verbose:
+                    print(f"  Cleaned web cache: {web_dir}")
+
+            # Also clean the sync hash cache so web sync doesn't restore files
+            sync_hashes_file = root / ".sync_hashes.json"
+            if sync_hashes_file.exists():
+                try:
+                    import json
+                    with open(sync_hashes_file, 'r') as f:
+                        hashes = json.load(f)
+                    if node_name in hashes:
+                        del hashes[node_name]
+                        with open(sync_hashes_file, 'w') as f:
+                            json.dump(hashes, f, indent=2)
+                        if args.verbose:
+                            print(f"  Cleaned sync hash for {node_name}")
+                except Exception as e:
+                    print(f"  [!] Warning: Could not clean sync hash: {e}")
+
+            print(f"  [OK] Disabled (web cache cleaned)")
+            success_count += 1
+        else:
+            print(f"  Would disable: {node_path}")
+            success_count += 1
+
+        print()
+
+    print(f"{'='*70}")
+    print(f"Result: {success_count}/{len(nodes_to_process)} nodes disabled")
+    print(f"{'='*70}\n")
+
+    return 0 if success_count == len(nodes_to_process) else 1
+
+
+def cmd_enable(args, config):
+    """Re-enable disabled node(s) by restoring the submodule."""
+    root = get_dazzlenodes_root()
+    nodes_dir = root / "nodes"
+    node_mappings = parse_gitmodules()
+
+    if not node_mappings:
+        print("Error: No nodes found in .gitmodules")
+        return 1
+
+    if args.node == "all":
+        nodes_to_process = list(node_mappings.keys())
+    elif args.node in node_mappings:
+        nodes_to_process = [args.node]
+    else:
+        print(f"Error: Unknown node '{args.node}'")
+        print(f"Available nodes: {', '.join(node_mappings.keys())}")
+        return 1
+
+    print(f"\n{'='*70}")
+    print(f"ENABLING NODES")
+    print(f"{'='*70}\n")
+
+    success_count = 0
+    for node_name in nodes_to_process:
+        node_path = nodes_dir / node_name
+        disabled_marker = node_path / "DISABLED"
+
+        print(f"Processing: {node_name}")
+
+        if not disabled_marker.exists():
+            print(f"  [i] Not disabled, skipping")
+            success_count += 1
+            continue
+
+        if not args.dry_run:
+            # Remove disabled placeholder directory
+            if not remove_path(node_path, args.verbose):
+                print(f"  [X] Failed to remove disabled placeholder")
+                continue
+
+            # Restore submodule
+            try:
+                submodule_path = f"nodes/{node_name}"
+                result = subprocess.run(
+                    ["git", "-C", str(root), "submodule", "update", "--init", submodule_path],
+                    capture_output=True, text=True, check=True
+                )
+                print(f"  [OK] Re-enabled (submodule restored)")
+                if args.verbose and result.stdout.strip():
+                    print(f"     {result.stdout.strip()}")
+                success_count += 1
+            except subprocess.CalledProcessError as e:
+                print(f"  [X] Failed to restore submodule: {e.stderr}")
+        else:
+            print(f"  Would enable: remove placeholder, restore submodule")
+            success_count += 1
+
+        print()
+
+    print(f"{'='*70}")
+    print(f"Result: {success_count}/{len(nodes_to_process)} nodes enabled")
+    print(f"{'='*70}\n")
+
+    return 0 if success_count == len(nodes_to_process) else 1
+
+
 def main():
     """Main entry point."""
     # Load configuration
@@ -776,6 +954,8 @@ Examples:
   python dev_mode.py dev smart-resolution-calc    # Switch one node to dev mode
   python dev_mode.py dev all                      # Switch all nodes to dev mode
   python dev_mode.py publish all                  # Restore all submodules
+  python dev_mode.py disable smart-resolution-calc  # Disable node (skip loading)
+  python dev_mode.py enable smart-resolution-calc   # Re-enable (restore submodule)
   python dev_mode.py -v dev all                   # Verbose mode
   python dev_mode.py --dry-run publish all        # Show what would be done
         """
@@ -815,6 +995,18 @@ Examples:
     publish_parser.add_argument("node", nargs="?",
                                help="Node name or 'all' (required)")
 
+    # Disable command
+    disable_parser = subparsers.add_parser("disable",
+                                           help="Disable node(s) — skip loading without removing submodule")
+    disable_parser.add_argument("node", nargs="?",
+                               help="Node name or 'all' (required)")
+
+    # Enable command
+    enable_parser = subparsers.add_parser("enable",
+                                          help="Re-enable disabled node(s) (restores submodule)")
+    enable_parser.add_argument("node", nargs="?",
+                               help="Node name or 'all' (required)")
+
     # Parse arguments
     args = parser.parse_args()
 
@@ -845,6 +1037,24 @@ Examples:
                 print(f"Available nodes: {', '.join(node_mappings.keys())}")
             return 1
         return cmd_publish(args, config)
+    elif args.command == "disable":
+        if not args.node:
+            node_mappings = parse_gitmodules()
+            print("Error: Node name required")
+            print(f"Usage: python dev_mode.py disable [node|all]")
+            if node_mappings:
+                print(f"Available nodes: {', '.join(node_mappings.keys())}")
+            return 1
+        return cmd_disable(args, config)
+    elif args.command == "enable":
+        if not args.node:
+            node_mappings = parse_gitmodules()
+            print("Error: Node name required")
+            print(f"Usage: python dev_mode.py enable [node|all]")
+            if node_mappings:
+                print(f"Available nodes: {', '.join(node_mappings.keys())}")
+            return 1
+        return cmd_enable(args, config)
     else:
         parser.print_help()
         return 0

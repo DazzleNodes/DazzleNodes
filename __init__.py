@@ -88,6 +88,9 @@ def _init_submodules_if_needed():
             # is_junction() added in Python 3.12
             if child.is_symlink():
                 continue
+        # Skip disabled nodes (set by dev_mode.py disable command)
+        if (child / "DISABLED").exists():
+            continue
         # Check if directory is empty (or only contains .git file)
         contents = list(child.iterdir())
         if len(contents) == 0 or (len(contents) == 1 and contents[0].name == ".git"):
@@ -143,6 +146,12 @@ _nodes_dir = _current_dir / "nodes"
 def load_node_module(node_dir_name, display_name):
     """Load a node module from a directory (even with hyphens in name)"""
     node_path = _nodes_dir / node_dir_name
+
+    # Check for DISABLED marker (set by dev_mode.py disable command)
+    if (node_path / "DISABLED").exists():
+        print(f"[DazzleNodes] {display_name} is DISABLED (skipping)")
+        return 0
+
     init_file = node_path / "__init__.py"
 
     if not init_file.exists():

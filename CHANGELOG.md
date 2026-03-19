@@ -5,6 +5,25 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.7-alpha] - 2026-03-19
+
+### Changed
+- **smart-resolution-calc**: Updated submodule from v0.8.4 to v0.9.10
+  - Full-stack modularization (JS: 5,379 -> 920 line orchestrator + 16 modules,
+    Python: 2,296 -> 1,024 lines + 4 modules)
+  - DazzleWidget/DazzleToggleWidget class hierarchy
+  - Seed system rewrite (rgthree-style prompt interception)
+  - Widget visibility correctness fix (splice -> draw override)
+  - 122 automated tests (Vitest + Playwright + pytest)
+  - See [SmartResCalc v0.9.10 release notes](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.9.10) for details
+
+### Added
+- **dev_mode.py**: `disable` and `enable` commands for temporarily disabling nodes during development
+- **__init__.py**: DISABLED marker support — skips loading nodes marked with DISABLED file
+
+### Release Note (will include unreleased v0.5.6-alpha)
+- **dazzle-comfy-plasma-fast**: BlendImages fix described below
+
 ## [0.5.6-alpha] - 2026-03-14
 
 ### Fixed
