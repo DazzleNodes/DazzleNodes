@@ -5,6 +5,19 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.8-alpha] - 2026-03-19
+
+### Fixed
+- **__init__.py**: Submodule auto-init fallback for ComfyUI Registry installs
+  - Registry distributes packages as tarballs without `.git` directory
+  - `git submodule update --init --recursive` silently exits 0 but does nothing
+  - New fallback: parses `.gitmodules` URLs and clones each submodule directly
+  - Pinned versions via `submodule_versions.json` ensure correct tag is cloned
+
+### Added
+- **submodule_versions.json**: Manifest mapping submodule paths to pinned release tags
+  - Must be updated alongside submodule pointer changes
+
 ## [0.5.7-alpha] - 2026-03-19
 
 ### Changed

@@ -1,0 +1,7 @@
+{
+    "nodes/smart-resolution-calc": "v0.9.10",
+    "nodes/fit-mask-to-image": "v0.2.3-alpha",
+    "nodes/dazzle-comfy-plasma-fast": "v0.4.0",
+    "nodes/dazzle-switch": "v0.4.0-alpha",
+    "nodes/preview-bridge-extended": "v0.3.3-alpha"
+}
