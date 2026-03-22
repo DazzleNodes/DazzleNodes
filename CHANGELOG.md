@@ -5,6 +5,18 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.10-alpha] - 2026-03-22
+
+### Changed
+- **smart-resolution-calc**: Updated submodule from v0.10.4 to v0.10.6
+  - Per-bin normalization (spectral whitening) — resolution-independent noise composition
+  - DazzleOptionsNode — extensible advanced configuration (norm_mode, whitening, cutoff_curve)
+  - feature_size parameter — decoupled from cutoff for resolution-independent workflows
+  - Pixel cutoff mode, feature_size display, hover preview, axis tooltips
+  - ColorPickerButton old-workflow guard, widget margin fixes, canvas state leak fix
+  - Old behavior preserved via DazzleOptions `norm_mode: global_rms`
+  - See [SmartResCalc v0.10.6 release notes](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.10.6) for details
+
 ## [0.5.9-alpha] - 2026-03-21
 
 ### Changed
