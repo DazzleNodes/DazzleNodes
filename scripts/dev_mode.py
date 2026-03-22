@@ -412,7 +412,12 @@ def remove_path(path, verbose=False):
             else:
                 path.unlink()
         elif path.is_dir():
-            shutil.rmtree(path)
+            def _on_rm_error(func, fpath, exc_info):
+                """Handle read-only files (e.g., .git/objects/pack on Windows)."""
+                import stat
+                os.chmod(fpath, stat.S_IWRITE)
+                func(fpath)
+            shutil.rmtree(path, onerror=_on_rm_error)
         else:
             path.unlink()
 

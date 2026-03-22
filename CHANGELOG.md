@@ -5,6 +5,23 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.9-alpha] - 2026-03-21
+
+### Changed
+- **smart-resolution-calc**: Updated submodule from v0.9.10 to v0.10.4
+  - `image_purpose` widget with 5 modes (img2img, dimensions only, img2noise, image+noise, img2img+img2noise)
+  - SpectralBlend2DWidget — 2D XY pad for blend_strength + cutoff visualization
+  - Cutoff parameter exposed (was hardcoded at 0.2)
+  - Preview thumbnail shows transformed input image
+  - VAE-encode pattern source for artifact-free img2noise
+  - Phase randomization for img2img+img2noise
+  - IS_CHANGED caching fix for fixed seeds
+  - Canvas corruption fix for older frontend versions
+  - See [SmartResCalc v0.10.4 release notes](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.10.4) for details
+
+### Fixed
+- **dev_mode.py**: Handle read-only `.git/objects/pack` files on Windows during disable/publish
+
 ## [0.5.8-alpha] - 2026-03-19
 
 ### Fixed
