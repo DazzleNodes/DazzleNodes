@@ -29,6 +29,19 @@ Extended preview bridge functionality for ComfyUI workflows.
 
 **Status:** Available from [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in the Comfy Registry; download from [Github](https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended) to `ComfyUI\custom_nodes` for standalone install
 
+### Dazzle Command (**[Github](https://github.com/DazzleNodes/ComfyUI-DazzleCommand)**)
+
+Workflow orchestration node with play/pause toggle. Coordinates seed control (SmartResCalc) and execution gates (Preview Bridge Extended) from a single click — without re-executing expensive generation steps.
+
+**Features:**
+
+- Play/pause buttons for one-click workflow control
+- 5-mode seed control: one run then random, new seed each run, reuse last seed, keep widget value, SmartResCalc decides
+- Cache-transparent operation (83% time savings on play toggle)
+- Seed bar entry with priority over SmartResCalc widget
+
+**Status:** Ships with DazzleNodes collection only. Source at [Github](https://github.com/DazzleNodes/ComfyUI-DazzleCommand).
+
 ### Dazzle Switch (standalone: **[Github](https://github.com/DazzleNodes/ComfyUI-DazzleSwitch)**)
 
 Smart switch node with dropdown-based input selection and INT override for cascading workflows. Route any data type through a named dropdown instead of moving noodles.
@@ -141,6 +154,7 @@ DazzleNodes/local/
 │   ├── smart-resolution-calc/    # Submodule → separate git repo
 │   ├── fit-mask-to-image/        # Submodule → separate git repo
 │   ├── dazzle-comfy-plasma-fast/ # Submodule → separate git repo
+│   ├── dazzle-command/             # Submodule → separate git repo
 │   ├── dazzle-switch/              # Submodule → separate git repo
 │   └── preview-bridge-extended/    # Submodule → separate git repo
 └── examples/                # Collection-level examples

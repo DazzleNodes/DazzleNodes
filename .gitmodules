@@ -13,3 +13,6 @@
 [submodule "nodes/dazzle-switch"]
 	path = nodes/dazzle-switch
 	url = https://github.com/DazzleNodes/ComfyUI-DazzleSwitch.git
+[submodule "nodes/dazzle-command"]
+	path = nodes/dazzle-command
+	url = https://github.com/DazzleNodes/ComfyUI-DazzleCommand.git

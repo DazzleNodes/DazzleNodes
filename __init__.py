@@ -360,6 +360,14 @@ except Exception as e:
     print(f"[DazzleNodes] [WARN] Could not load Dazzle Switch: {e}")
 
 # ============================================================================
+try:
+    num_nodes = load_node_module("dazzle-command", "Dazzle Command")
+    _loaded_nodes.append(f"Dazzle Command ({num_nodes} nodes)")
+except Exception as e:
+    _failed_nodes.append(("Dazzle Command", str(e)))
+    print(f"[DazzleNodes] [WARN] Could not load Dazzle Command: {e}")
+
+# ============================================================================
 # Report Loading Status
 # ============================================================================
 if _loaded_nodes:

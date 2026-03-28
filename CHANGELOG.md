@@ -5,6 +5,31 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0-alpha] - 2026-03-28
+
+### Added
+- **dazzle-command**: New workflow orchestration node (v0.2.0-alpha)
+  - Play/pause toggle coordinates seed control and execution gates
+  - 5-mode seed control: one run then random, new seed each run, reuse last seed,
+    keep widget value, SmartResCalc decides
+  - Cache-transparent operation (83% time savings on play toggle)
+  - Seed bar entry with priority over SmartResCalc widget
+  - Debug logger with localStorage enable
+
+### Changed
+- **smart-resolution-calc**: Updated submodule from v0.10.6 to v0.11.0
+  - DAZZLE_SIGNAL input for Dazzle Command orchestration
+  - JS seed lock in prompt hook with 5-mode control
+  - Prompt input stripping for cache-transparent noodle binding
+  - Noise cache key split, seed random mode fix, SpectralBlend2D resize fix
+  - Display name: "Smart Resolution Calculator (DazzleNodes)"
+- **preview-bridge-extended**: Updated submodule from v0.3.5-alpha to v0.4.0-alpha
+  - Preview Bridge Ext. Latent node (LATENT+VAE variant)
+  - DAZZLE_SIGNAL input for play/pause gate control
+  - node_base.py refactor for shared mask orchestration
+- **dazzle-comfy-plasma-fast**: Updated submodule from v0.4.0 to v0.4.1
+  - BlendImages: size_mode parameter (match A/B/larger/smaller/exact)
+
 ## [0.5.10-alpha] - 2026-03-22
 
 ### Changed
