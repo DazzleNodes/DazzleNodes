@@ -5,6 +5,16 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1-alpha] - 2026-03-28
+
+### Fixed
+- **submodule_versions.json**: Updated to match actual submodule tags. ComfyUI Manager
+  installs use this file (not git submodules) to resolve node versions. Missing update
+  caused fresh installs to pull stale versions (PBE at v0.3.3 instead of v0.4.0-alpha).
+- **dazzle-command**: Updated from v0.2.0-alpha to v0.2.1-alpha — fixes dynamic JS imports
+  for DazzleNodes aggregate compatibility (play/pause buttons not appearing when loaded
+  through DazzleNodes instead of standalone)
+
 ## [0.6.0-alpha] - 2026-03-28
 
 ### Added
