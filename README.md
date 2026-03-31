@@ -11,23 +11,29 @@ A curated collection of image/latent creation and transformation custom nodes fo
 
 ## Included Nodes
 
-### Smart Resolution Calculator (standalone: **[Github](https://github.com/djdarcy/ComfyUI-Smart-Resolution-Calc) & [Comfy Registry](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-smart-resolution-calc)**)
-Flexible resolution and latent generation with intelligent aspect ratio handling.
+### Smart Resolution Calculator (standalone: **[Github](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc) & [Comfy Registry](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-smart-resolution-calc)**)
+Flexible resolution and latent generation with intelligent aspect ratio handling, spectral noise blending, and DazzleCommand seed orchestration.
 
 **Features:**
-- Toggle-based dimension control
-- Automatic missing value calculation
-- Preview image generation
-- Direct latent output for sampling
-- Custom widgets for enhanced UX
+- Toggle-based dimension control with automatic missing value calculation
+- 10 fill patterns (5 built-in + 5 DazNoise types) with spectral blending
+- Image transforms: distort, crop/pad, scale/crop, scale/pad
+- Direct latent output for all VAE types (SD1.5/SDXL/Flux/WAN/Qwen)
+- Per-node DazzleCommand integration for multi-pipeline seed control
 
-**Status:** Published standalone in [ComfyUI Registry](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-smart-resolution-calc) and in [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in ComfyUI Registry
+**Status:** Published standalone in [ComfyUI Registry](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-smart-resolution-calc) and in [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes)
 
-### Preview Bridge Extended (standalone: **[Github](https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended)**)
+### Preview Bridge Extended (standalone: **[Github](https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended) & [Comfy Registry](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-preview-bridge-extended)**)
 
-Extended preview bridge functionality for ComfyUI workflows.
+Enhanced Preview Bridge with 3-layer mask editing, MaskEditor integration, and DazzleCommand orchestration. IMAGE and LATENT+VAE variants.
 
-**Status:** Available from [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in the Comfy Registry; download from [Github](https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended) to `ComfyUI\custom_nodes` for standalone install
+**Features:**
+- Optional mask input with 3-layer editing (input/additions/subtractions)
+- Cache-compatible deterministic preview filenames
+- Smart blocking with DazzleCommand play/pause gate control
+- Multi-DazzleCommand support — each PBE reads its own connected DC's state
+
+**Status:** Published standalone in [ComfyUI Registry](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-preview-bridge-extended) and in [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes)
 
 ### Dazzle Command (**[Github](https://github.com/DazzleNodes/ComfyUI-DazzleCommand)**)
 
@@ -37,12 +43,13 @@ Workflow orchestration node with play/pause toggle. Coordinates seed control (Sm
 
 - Play/pause buttons for one-click workflow control
 - 5-mode seed control: one run then random, new seed each run, reuse last seed, keep widget value, SmartResCalc decides
-- Cache-transparent operation (83% time savings on play toggle)
+- Per-node state registry — multiple DazzleCommands operate independently
+- Cache-transparent operation (repeat runs cached in 0.01s)
 - Seed bar entry with priority over SmartResCalc widget
 
-**Status:** Ships with DazzleNodes collection only. Source at [Github](https://github.com/DazzleNodes/ComfyUI-DazzleCommand).
+**Status:** Available from [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in the Comfy Registry; download from [Github](https://github.com/DazzleNodes/ComfyUI-DazzleCommand) for standalone install
 
-### Dazzle Switch (standalone: **[Github](https://github.com/DazzleNodes/ComfyUI-DazzleSwitch)**)
+### Dazzle Switch (**[Github](https://github.com/DazzleNodes/ComfyUI-DazzleSwitch)**)
 
 Smart switch node with dropdown-based input selection and INT override for cascading workflows. Route any data type through a named dropdown instead of moving noodles.
 
@@ -56,7 +63,7 @@ Smart switch node with dropdown-based input selection and INT override for casca
 - Active slot highlight for visual feedback
 - Label cache preserves user renames across disconnect/reconnect cycles
 
-**Status:** Available from [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in the Comfy Registry; download from [Github](https://github.com/DazzleNodes/ComfyUI-DazzleSwitch) to `ComfyUI\custom_nodes` for standalone install
+**Status:** Available from [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes) in the Comfy Registry; download from [Github](https://github.com/DazzleNodes/ComfyUI-DazzleSwitch) for standalone install
 
 ### Fit Mask to Image (standalone: **[Github](https://github.com/DazzleNodes/fit-mask-to-image)**)
 

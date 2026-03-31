@@ -87,6 +87,103 @@ def get_dazzlenodes_root():
     script_dir = Path(__file__).parent
     return script_dir.parent
 
+def _get_submodule_version(root, node_name):
+    """Read version for a node from submodule_versions.json.
+
+    Fallback for when git submodule commands aren't available
+    (e.g., ComfyUI Manager tarball installs without .git directory).
+    """
+    versions_path = root / "submodule_versions.json"
+    if not versions_path.exists():
+        return None
+    try:
+        import json
+        versions = json.loads(versions_path.read_text())
+        return versions.get(f"nodes/{node_name}")
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"  [WARN] Could not read submodule_versions.json: {e}")
+        return None
+
+
+def create_standalone_link(target_path, link_path, verbose=False):
+    """Create a symlink (Unix) or junction (Windows) for standalone dev testing.
+
+    Args:
+        target_path: The source directory (local dev repo)
+        link_path: Where to create the link (in custom_nodes/)
+
+    Returns:
+        bool: True if link was created successfully
+    """
+    target_path = Path(target_path)
+    link_path = Path(link_path)
+
+    if link_path.exists():
+        if is_symlink(link_path):
+            print(f"  [i] Standalone link already exists: {link_path}")
+            return True
+        else:
+            print(f"  [X] Path exists and is not a symlink: {link_path}")
+            return False
+
+    if not target_path.exists():
+        print(f"  [X] Source path does not exist: {target_path}")
+        return False
+
+    try:
+        if sys.platform == "win32":
+            # Use junction on Windows (no admin required)
+            result = subprocess.run(
+                ["cmd", "/c", "mklink", "/J", str(link_path), str(target_path)],
+                capture_output=True, text=True
+            )
+            if result.returncode != 0:
+                # Fallback to PowerShell
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     f"New-Item -ItemType Junction -Path '{link_path}' -Target '{target_path}'"],
+                    capture_output=True, text=True, check=True
+                )
+        else:
+            # Unix: use symlink
+            link_path.symlink_to(target_path)
+
+        if verbose:
+            print(f"  Created link: {link_path} -> {target_path}")
+        return True
+    except Exception as e:
+        print(f"  [X] Failed to create standalone link: {e}")
+        return False
+
+
+def remove_standalone_link(link_path, verbose=False):
+    """Remove a standalone symlink/junction, verifying it IS a link first.
+
+    Returns:
+        bool: True if removed successfully (or didn't exist)
+    """
+    link_path = Path(link_path)
+    if not link_path.exists():
+        return True
+
+    if not is_symlink(link_path):
+        print(f"  [X] SAFETY: {link_path} is NOT a symlink/junction. Not removing.")
+        return False
+
+    try:
+        if sys.platform == "win32":
+            # On Windows, junctions are removed with rmdir (not del)
+            os.rmdir(str(link_path))
+        else:
+            link_path.unlink()
+        if verbose:
+            print(f"  Removed standalone link: {link_path}")
+        return True
+    except Exception as e:
+        print(f"  [X] Failed to remove standalone link: {e}")
+        return False
+
+
 def parse_gitmodules():
     """
     Parse .gitmodules file to discover node mappings.
@@ -754,7 +851,27 @@ def cmd_publish(args, config):
                     print(f"     {result.stdout.strip()}")
                 success_count += 1
             except subprocess.CalledProcessError as e:
-                print(f"  [X] Failed to restore submodule: {e.stderr}")
+                # Fallback: clone from .gitmodules + submodule_versions.json
+                # Handles ComfyUI Manager installs (no .git directory)
+                print(f"  [i] Git submodule failed, trying clone fallback...")
+                url = node_mappings[node_name]
+                version = _get_submodule_version(root, node_name)
+                if url and version:
+                    try:
+                        clone_cmd = ["git", "clone", "--depth", "1",
+                                     "--branch", version, url, str(node_path)]
+                        clone_result = subprocess.run(
+                            clone_cmd, capture_output=True, text=True, check=True)
+                        print(f"  [OK] Cloned {node_name} at {version} (fallback)")
+                        if args.verbose:
+                            print(f"     {clone_result.stdout.strip()}")
+                        success_count += 1
+                    except subprocess.CalledProcessError as clone_err:
+                        print(f"  [X] Clone fallback also failed: {clone_err.stderr}")
+                elif not version:
+                    print(f"  [X] No version in submodule_versions.json for {node_name}")
+                else:
+                    print(f"  [X] No URL found for {node_name}")
         else:
             print(f"  Would run: git submodule update --init nodes/{node_name}")
             success_count += 1
@@ -862,9 +979,37 @@ def cmd_disable(args, config):
                     print(f"  [!] Warning: Could not clean sync hash: {e}")
 
             print(f"  [OK] Disabled (web cache cleaned)")
+
+            # Create standalone junction/symlink if requested
+            if getattr(args, 'standalone', False):
+                local_paths = load_local_mappings()
+                source_path = local_paths.get(node_name)
+                if source_path:
+                    # Junction goes in the parent custom_nodes directory
+                    custom_nodes_dir = root.parent
+                    link_path = custom_nodes_dir / node_name
+                    if not args.dry_run:
+                        if create_standalone_link(source_path, link_path, args.verbose):
+                            # Write marker so 'enable' knows where to clean up
+                            standalone_marker = node_path / "STANDALONE_LINK"
+                            standalone_marker.write_text(str(link_path) + "\n")
+                            print(f"  [OK] Standalone link: {link_path} -> {source_path}")
+                        else:
+                            print(f"  [!] Standalone link creation failed (node still disabled)")
+                    else:
+                        print(f"  Would create standalone link: {custom_nodes_dir / node_name} -> {source_path}")
+                else:
+                    print(f"  [!] No local path configured for {node_name} in dev_mode_local.yaml")
+                    print(f"      Add it to use --standalone")
+
             success_count += 1
         else:
             print(f"  Would disable: {node_path}")
+            if getattr(args, 'standalone', False):
+                local_paths = load_local_mappings()
+                source_path = local_paths.get(node_name)
+                if source_path:
+                    print(f"  Would create standalone link: {root.parent / node_name} -> {source_path}")
             success_count += 1
 
         print()
@@ -912,6 +1057,17 @@ def cmd_enable(args, config):
             continue
 
         if not args.dry_run:
+            # Clean up standalone link if one was created during disable
+            standalone_marker = node_path / "STANDALONE_LINK"
+            if standalone_marker.exists():
+                link_path_str = standalone_marker.read_text().strip()
+                link_path = Path(link_path_str)
+                if remove_standalone_link(link_path, args.verbose):
+                    print(f"  [OK] Removed standalone link: {link_path}")
+                else:
+                    print(f"  [!] Could not remove standalone link: {link_path}")
+                    print(f"      Please remove it manually before continuing")
+
             # Remove disabled placeholder directory
             if not remove_path(node_path, args.verbose):
                 print(f"  [X] Failed to remove disabled placeholder")
@@ -929,9 +1085,24 @@ def cmd_enable(args, config):
                     print(f"     {result.stdout.strip()}")
                 success_count += 1
             except subprocess.CalledProcessError as e:
-                print(f"  [X] Failed to restore submodule: {e.stderr}")
+                # Fallback: clone from submodule_versions.json (no .git)
+                print(f"  [i] Git submodule failed, trying clone fallback...")
+                url = node_mappings[node_name]
+                version = _get_submodule_version(root, node_name)
+                if url and version:
+                    try:
+                        clone_cmd = ["git", "clone", "--depth", "1",
+                                     "--branch", version, url, str(node_path)]
+                        clone_result = subprocess.run(
+                            clone_cmd, capture_output=True, text=True, check=True)
+                        print(f"  [OK] Re-enabled via clone at {version} (fallback)")
+                        success_count += 1
+                    except subprocess.CalledProcessError as clone_err:
+                        print(f"  [X] Clone fallback also failed: {clone_err.stderr}")
+                else:
+                    print(f"  [X] Failed to restore: {e.stderr}")
         else:
-            print(f"  Would enable: remove placeholder, restore submodule")
+            print(f"  Would enable: remove placeholder + standalone link, restore submodule")
             success_count += 1
 
         print()
@@ -1005,6 +1176,8 @@ Examples:
                                            help="Disable node(s) — skip loading without removing submodule")
     disable_parser.add_argument("node", nargs="?",
                                help="Node name or 'all' (required)")
+    disable_parser.add_argument("--standalone", action="store_true",
+                               help="Create standalone symlink/junction in custom_nodes parent dir")
 
     # Enable command
     enable_parser = subparsers.add_parser("enable",

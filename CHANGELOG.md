@@ -5,6 +5,23 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.3-alpha] - 2026-03-30
+
+### Changed
+- **Smart Resolution Calculator** updated to [v0.11.4](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.11.4)
+  - Per-node DazzleCommand state lookup via `_dazzle_dc_id` marker (#56, DazzleCommand#5)
+  - Noodle-required orchestration — standalone nodes unaffected by unconnected DazzleCommands
+  - `seed_intent='lock'` trusts JS-resolved seed (removed stale Python override)
+- **Preview Bridge Extended** updated to [v0.4.3-alpha](https://github.com/DazzleNodes/ComfyUI-PreviewBridgeExtended/releases/tag/v0.4.3-alpha)
+  - Deterministic preview filenames — fixes cache invalidation that re-executed downstream nodes
+  - Per-node DazzleCommand state from signal dict (multi-DC support)
+  - Repeat runs cached in 0.01s (vs 40s+ previously)
+- **Dazzle Command** updated to [v0.2.4-alpha](https://github.com/DazzleNodes/ComfyUI-DazzleCommand/releases/tag/v0.2.4-alpha)
+  - Per-node state registry (`DazzleCommandState` class) replaces global singleton
+  - API keys state by node ID, JS deferred setState for correct ID assignment
+  - Signal carries `active_state` (schema v2) for per-noodle PBE reading
+- **Updated README** -- node descriptions, registry links, feature lists
+
 ## [0.6.2-alpha] - 2026-03-28
 
 ### Fixed
