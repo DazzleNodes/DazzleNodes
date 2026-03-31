@@ -5,6 +5,18 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.4-alpha] - 2026-03-31
+
+### Changed
+- **Dazzle Command** updated to [v0.2.6-alpha](https://github.com/DazzleNodes/ComfyUI-DazzleCommand/releases/tag/v0.2.6-alpha)
+  - Reset All button — sets all DazzleCommand nodes to paused for fresh workflow runs
+  - State reset race condition fix — play/pause survives mid-execution reconfigures
+  - OUTPUT_NODE restored (does not affect caching)
+- **dev_mode.py** fixes
+  - `--standalone` works when node already disabled
+  - `custom_nodes_dir` config in `dev_mode_local.yaml` (fixes wrong junction path)
+  - PowerShell-first for junction creation
+
 ## [0.6.3-alpha] - 2026-03-30
 
 ### Changed

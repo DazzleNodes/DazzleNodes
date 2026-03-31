@@ -132,18 +132,15 @@ def create_standalone_link(target_path, link_path, verbose=False):
 
     try:
         if sys.platform == "win32":
-            # Use junction on Windows (no admin required)
+            # Use PowerShell for junctions (cmd.exe mklink fails silently from bash/WSL)
             result = subprocess.run(
-                ["cmd", "/c", "mklink", "/J", str(link_path), str(target_path)],
+                ["powershell", "-Command",
+                 f"New-Item -ItemType Junction -Path '{link_path}' -Target '{target_path}'"],
                 capture_output=True, text=True
             )
             if result.returncode != 0:
-                # Fallback to PowerShell
-                result = subprocess.run(
-                    ["powershell", "-Command",
-                     f"New-Item -ItemType Junction -Path '{link_path}' -Target '{target_path}'"],
-                    capture_output=True, text=True, check=True
-                )
+                print(f"  [X] PowerShell junction failed: {result.stderr.strip()}")
+                return False
         else:
             # Unix: use symlink
             link_path.symlink_to(target_path)
@@ -251,6 +248,39 @@ def load_local_mappings():
     except Exception as e:
         print(f"Warning: Could not load local mappings: {e}")
         return {}
+
+
+def get_custom_nodes_dir(root):
+    """Get the custom_nodes directory for standalone junction creation.
+
+    Checks dev_mode_local.yaml for explicit 'custom_nodes_dir' setting.
+    Falls back to root.parent (works when DazzleNodes is directly in custom_nodes/).
+
+    Args:
+        root: DazzleNodes root directory (Path)
+
+    Returns:
+        Path: The custom_nodes directory
+    """
+    script_dir = Path(__file__).parent
+    local_config_path = script_dir / LOCAL_MAPPINGS_FILE
+
+    if local_config_path.exists():
+        try:
+            with open(local_config_path, 'r') as f:
+                local_config = yaml.safe_load(f) or {}
+                custom_dir = local_config.get('custom_nodes_dir')
+                if custom_dir:
+                    p = Path(custom_dir)
+                    if p.exists():
+                        return p
+                    else:
+                        print(f"  [!] custom_nodes_dir in yaml does not exist: {custom_dir}")
+        except Exception:
+            pass
+
+    # Fallback: assume DazzleNodes is directly in custom_nodes/
+    return root.parent
 
 
 def is_valid_local_path(path_str):
@@ -932,6 +962,30 @@ def cmd_disable(args, config):
                     print(f"  [i] Already disabled (would clean stale web cache at {web_dir})")
             else:
                 print(f"  [i] Already disabled")
+
+            # Still allow --standalone junction creation even if already disabled
+            if getattr(args, 'standalone', False):
+                local_paths = load_local_mappings()
+                source_path = local_paths.get(node_name)
+                if source_path:
+                    custom_nodes_dir = get_custom_nodes_dir(root)
+                    link_path = custom_nodes_dir / node_name
+                    if not link_path.exists():
+                        if not args.dry_run:
+                            if create_standalone_link(source_path, link_path, args.verbose):
+                                standalone_marker = node_path / "STANDALONE_LINK"
+                                standalone_marker.write_text(str(link_path) + "\n")
+                                print(f"  [OK] Standalone link: {link_path} -> {source_path}")
+                            else:
+                                print(f"  [!] Standalone link creation failed")
+                        else:
+                            print(f"  Would create standalone link: {link_path} -> {source_path}")
+                    else:
+                        print(f"  [i] Standalone link already exists: {link_path}")
+                else:
+                    print(f"  [!] No local path configured for {node_name} in dev_mode_local.yaml")
+                    print(f"      Add it to use --standalone")
+
             success_count += 1
             continue
 
@@ -986,7 +1040,7 @@ def cmd_disable(args, config):
                 source_path = local_paths.get(node_name)
                 if source_path:
                     # Junction goes in the parent custom_nodes directory
-                    custom_nodes_dir = root.parent
+                    custom_nodes_dir = get_custom_nodes_dir(root)
                     link_path = custom_nodes_dir / node_name
                     if not args.dry_run:
                         if create_standalone_link(source_path, link_path, args.verbose):
