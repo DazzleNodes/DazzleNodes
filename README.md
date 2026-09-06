@@ -19,7 +19,8 @@ Flexible resolution and latent generation with intelligent aspect ratio handling
 - 10 fill patterns (5 built-in + 5 DazNoise types) with spectral blending
 - Image transforms: distort, crop/pad, scale/crop, scale/pad
 - Direct latent output for all VAE types (SD1.5/SDXL/Flux/WAN/Qwen)
-- Per-node DazzleCommand integration for multi-pipeline seed control
+- Optional mask input for image cutout composite; `fill_blend_strength` for hybrid fill-pattern plus image noise
+- DazzleCommand integration with per-tab seed persistence; the last seed is recovered on workflow reload and on image drag-in
 
 **Status:** Published standalone in [ComfyUI Registry](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-smart-resolution-calc) and in [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes)
 
@@ -43,7 +44,7 @@ Workflow orchestration node with play/pause toggle. Coordinates seed control (Sm
 
 - Play/pause buttons for one-click workflow control
 - 5-mode seed control: one run then random, new seed each run, reuse last seed, keep widget value, SmartResCalc decides
-- Per-node state registry — multiple DazzleCommands operate independently
+- Per-node, per-tab state kept on the node itself (no server registry) — multiple DazzleCommands and multiple workflow tabs operate independently
 - Cache-transparent operation (repeat runs cached in 0.01s)
 - Seed bar entry with priority over SmartResCalc widget
 

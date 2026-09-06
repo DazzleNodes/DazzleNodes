@@ -5,6 +5,40 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.5-alpha] - 2026-09-06
+
+### Changed
+- **Smart Resolution Calculator** updated from v0.11.4 to [v0.12.4](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.12.4)
+  (five releases; 0.12.0 through 0.12.2 had not been cascaded into the collection before)
+  - [v0.12.0](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.12.0): optional `MASK` input
+    for image cutout composite; mask-aware spectral pattern in `img2noise`; mask fingerprint in `IS_CHANGED`;
+    `docs/mask-input.md`
+  - [v0.12.1](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.12.1): `fill_blend_strength`
+    input for hybrid fill_type plus image noise in the img2noise modes (#57); the SpectralBlend2D header shows both
+    blend values
+  - [v0.12.2](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.12.2): cross-tab seed amnesia
+    fixed (the last seed persists per workflow tab); explicit seed-widget clicks override 'reuse last seed' once;
+    rerouted `dazzle_signal` noodles recognized; dead Python signal path removed
+  - [v0.12.3](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.12.3): the last seed survives
+    a workflow reload (recycle lit at load, `-2`/`-3` continue from it); random-mode readout shows the seed dimmed;
+    generated images now embed their own seed instead of the previous run's
+  - [v0.12.4](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.12.4): dragged-in images
+    recover their own seed from the prompt block, whatever version made them (#58)
+- **Dazzle Command** updated to [v0.2.7-alpha](https://github.com/DazzleNodes/ComfyUI-DazzleCommand/releases/tag/v0.2.7-alpha)
+  (required by Smart Resolution Calculator 0.12.2 and later)
+  - Cross-tab state contamination fixed: state lives on each node object plus `node.properties` (persisted per
+    workflow-tab draft) and reaches Python per queue through a hidden `dazzle_state` prompt input; the JS
+    `nodeStates` map, the `sys._dazzle_command_states` registry, and the `/dazzle-command/set-state` API are removed
+  - Mid-session reconfigures no longer revert Play/Pause clicks
+  - Seed bar display is noodle-required (it no longer adopts seeds from unconnected SmartResCalc nodes); seed bar
+    values persist per tab
+- `submodule_versions.json` updated for both (the file ComfyUI Manager resolves)
+- README: node feature lists refreshed for the above
+
+### Unchanged
+- Preview Bridge Extended v0.4.3-alpha, Dazzle Switch v0.4.0-alpha, Fit Mask to Image v0.2.3-alpha,
+  Plasma Fast v0.4.1: all already at their newest tags
+
 ## [0.6.4-alpha] - 2026-03-31
 
 ### Changed
