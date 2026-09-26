@@ -5,6 +5,26 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.6-alpha] - 2026-09-26
+
+### Changed
+- **Smart Resolution Calculator** updated from v0.12.4 to [v0.12.7](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.12.7)
+  (ComfyUI frontend 1.53 compatibility; 0.12.6 was not released separately)
+  - [v0.12.5](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.12.5): on frontend 1.53,
+    reloaded workflows and dragged-in images restore the values they were saved with (height, seed mode); the scale
+    slider reaches Python again; custom scale step sizes are kept on save; the scale widget is found after frontend
+    adoption (PR #59 by @DrJKL); #60
+  - 0.12.6: a node linked into the `scale` input drives the output again (0.12.5 sent the slider's value instead);
+    Registry publishing follows GitHub releases
+  - [v0.12.7](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.12.7): the scale slider is
+    a view on the node's own `scale` input (one stored value, no `scale#1` duplicates, "SCALE (linked)" when linked)
+- `submodule_versions.json` updated (the file ComfyUI Manager resolves)
+- README: Smart Resolution Calculator feature list notes frontend 1.53 support
+
+### Unchanged
+- Dazzle Command v0.2.7-alpha, Preview Bridge Extended v0.4.3-alpha, Dazzle Switch v0.4.0-alpha,
+  Fit Mask to Image v0.2.3-alpha, Plasma Fast v0.4.1: all already at their newest tags
+
 ## [0.6.5-alpha] - 2026-09-06
 
 ### Changed

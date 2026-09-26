@@ -21,6 +21,7 @@ Flexible resolution and latent generation with intelligent aspect ratio handling
 - Direct latent output for all VAE types (SD1.5/SDXL/Flux/WAN/Qwen)
 - Optional mask input for image cutout composite; `fill_blend_strength` for hybrid fill-pattern plus image noise
 - DazzleCommand integration with per-tab seed persistence; the last seed is recovered on workflow reload and on image drag-in
+- Works with ComfyUI frontend 1.53
 
 **Status:** Published standalone in [ComfyUI Registry](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-smart-resolution-calc) and in [DazzleNodes package](https://registry.comfy.org/publishers/djdarcy/nodes/comfyui-dazzlenodes)
 
