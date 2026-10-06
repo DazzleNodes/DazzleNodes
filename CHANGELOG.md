@@ -5,6 +5,20 @@ All notable changes to DazzleNodes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.7-alpha] - 2026-10-06
+
+### Changed
+- **Smart Resolution Calculator** updated from v0.12.7 to [v0.12.8](https://github.com/DazzleNodes/ComfyUI-Smart-Resolution-Calc/releases/tag/v0.12.8)
+  - Transparent (RGBA) images keep their alpha: VAE encode no longer cuts them to RGB (so RGBA VAEs such as Qwen Image 2.1's receive the alpha; RGB VAEs still get RGB), and crop/pad, scale/pad and the mask cutout work on RGBA images (before, the pad transforms errored and the cutout was skipped)
+  - New Dazzle Options `fill_alpha` (`opaque` default / `transparent`): with `transparent`, padding and mask fills under an RGBA image are transparent
+  - Demo workflow `docs/workflow/SmartResCalc-RGBA-Alpha-Demo.json` with a transparent test image
+- `submodule_versions.json` updated (the file ComfyUI Manager resolves)
+- README: Smart Resolution Calculator feature list notes RGBA support
+
+### Unchanged
+- Dazzle Command v0.2.7-alpha, Preview Bridge Extended v0.4.3-alpha, Dazzle Switch v0.4.0-alpha,
+  Fit Mask to Image v0.2.3-alpha, Plasma Fast v0.4.1: all already at their newest tags
+
 ## [0.6.6-alpha] - 2026-09-26
 
 ### Changed

@@ -19,7 +19,7 @@ Flexible resolution and latent generation with intelligent aspect ratio handling
 - 10 fill patterns (5 built-in + 5 DazNoise types) with spectral blending
 - Image transforms: distort, crop/pad, scale/crop, scale/pad
 - Direct latent output for all VAE types (SD1.5/SDXL/Flux/WAN/Qwen)
-- Optional mask input for image cutout composite; `fill_blend_strength` for hybrid fill-pattern plus image noise
+- Optional mask input for image cutout composite; `fill_blend_strength` for hybrid fill-pattern plus image noise (also supports transparent RGBA with `fill_alpha`)
 - DazzleCommand integration with per-tab seed persistence; the last seed is recovered on workflow reload and on image drag-in
 - Works with ComfyUI frontend 1.53
 
